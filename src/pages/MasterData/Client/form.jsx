@@ -125,7 +125,7 @@ export default function ClientForm({ show, onClose, onSubmit, initialData }) {
                 <label htmlFor="mcm_cust_short" className={labelClass}>
                   Kode Klien
                 </label>
-                <input
+                <input autoComplete="off"
                   id="mcm_cust_short"
                   value={formData.mcm_cust_short}
                   onChange={(e) => field("mcm_cust_short", e.target.value)}
@@ -140,7 +140,7 @@ export default function ClientForm({ show, onClose, onSubmit, initialData }) {
                 <label htmlFor="mcm_cust_name" className={labelClass}>
                   Nama Klien
                 </label>
-                <input
+                <input autoComplete="off"
                   id="mcm_cust_name"
                   value={formData.mcm_cust_name}
                   onChange={(e) => field("mcm_cust_name", e.target.value)}
@@ -169,7 +169,7 @@ export default function ClientForm({ show, onClose, onSubmit, initialData }) {
                 <label htmlFor="mcm_cust_group" className={labelClass}>
                   Grup Klien
                 </label>
-                <select
+                <select autoComplete="off"
                   id="mcm_cust_group"
                   value={formData.mcm_cust_group}
                   onChange={(e) => field("mcm_cust_group", e.target.value)}
@@ -189,7 +189,7 @@ export default function ClientForm({ show, onClose, onSubmit, initialData }) {
                 <label htmlFor="mcm_cust_status" className={labelClass}>
                   Status
                 </label>
-                <select
+                <select autoComplete="off"
                   id="mcm_cust_status"
                   value={formData.mcm_cust_status}
                   onChange={(e) => field("mcm_cust_status", e.target.value)}
@@ -206,7 +206,7 @@ export default function ClientForm({ show, onClose, onSubmit, initialData }) {
               <label htmlFor="mcm_address" className={labelClass}>
                 Alamat Lengkap
               </label>
-              <textarea
+              <textarea autoComplete="off"
                 id="mcm_address"
                 value={formData.mcm_address}
                 onChange={(e) => field("mcm_address", e.target.value)}
@@ -222,7 +222,7 @@ export default function ClientForm({ show, onClose, onSubmit, initialData }) {
                 <label htmlFor="mcm_city" className={labelClass}>
                   Kota
                 </label>
-                <input
+                <input autoComplete="off"
                   id="mcm_city"
                   value={formData.mcm_city}
                   onChange={(e) => field("mcm_city", e.target.value)}
@@ -236,7 +236,7 @@ export default function ClientForm({ show, onClose, onSubmit, initialData }) {
                 <label htmlFor="mcm_prov" className={labelClass}>
                   Provinsi
                 </label>
-                <input
+                <input autoComplete="off"
                   id="mcm_prov"
                   value={formData.mcm_prov}
                   onChange={(e) => field("mcm_prov", e.target.value)}
@@ -252,7 +252,7 @@ export default function ClientForm({ show, onClose, onSubmit, initialData }) {
                 <label htmlFor="mcm_phone" className={labelClass}>
                   Telepon
                 </label>
-                <input
+                <input autoComplete="off"
                   id="mcm_phone"
                   type="tel"
                   inputMode="numeric"
@@ -269,7 +269,7 @@ export default function ClientForm({ show, onClose, onSubmit, initialData }) {
                 <label htmlFor="mcm_cust_radius" className={labelClass}>
                   Radius Absensi (meter)
                 </label>
-                <input
+                <input autoComplete="off"
                   id="mcm_cust_radius"
                   type="number"
                   value={formData.mcm_cust_radius}
@@ -292,7 +292,7 @@ export default function ClientForm({ show, onClose, onSubmit, initialData }) {
                 <label htmlFor="mcm_cust_lat" className={labelClass}>
                   Latitude
                 </label>
-                <input
+                <input autoComplete="off"
                   id="mcm_cust_lat"
                   value={formData.mcm_cust_lat}
                   onChange={(e) => field("mcm_cust_lat", e.target.value)}
@@ -306,7 +306,7 @@ export default function ClientForm({ show, onClose, onSubmit, initialData }) {
                 <label htmlFor="mcm_cust_lon" className={labelClass}>
                   Longitude
                 </label>
-                <input
+                <input autoComplete="off"
                   id="mcm_cust_lon"
                   value={formData.mcm_cust_lon}
                   onChange={(e) => field("mcm_cust_lon", e.target.value)}
@@ -367,7 +367,7 @@ export default function ClientForm({ show, onClose, onSubmit, initialData }) {
               <label htmlFor="mcm_remarks" className={labelClass}>
                 Catatan
               </label>
-              <textarea
+              <textarea autoComplete="off"
                 id="mcm_remarks"
                 value={formData.mcm_remarks}
                 onChange={(e) => field("mcm_remarks", e.target.value)}

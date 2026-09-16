@@ -2,6 +2,7 @@ import { Icon } from "@iconify/react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import menus from "../constants/menus.json";
+import useSession, { can } from "../hooks/useSession";
 
 const rowClass = (isActive) =>
   `relative flex justify-between items-center px-4 py-[12px] text-base rounded-md cursor-pointer overflow-hidden
@@ -15,7 +16,7 @@ const rowClass = (isActive) =>
    before:translate-x-[-101%] hover:before:translate-x-0
    before:transition-all before:duration-300 before:ease-in-out`;
 
-function MenuItem({ menu }) {
+function MenuItem({ menu, canRead }) {
   const { pathname } = useLocation();
   const hasChild = menu.children?.length > 0;
   const isActive = hasChild
@@ -44,7 +45,7 @@ function MenuItem({ menu }) {
           <div className="-m-px">
             <Icon
               icon="fa6-solid:chevron-down"
-              className={`w-3 h-3 transition-transform ${
+              className={`w-4 h-4 transition-transform ${
                 expanded ? "rotate-180" : ""
               }`}
             />
@@ -80,9 +81,11 @@ function MenuItem({ menu }) {
           }`}
         >
           <ul className="ml-6 space-y-[2px] overflow-hidden">
-            {menu.children.map((child) => (
-              <MenuItem key={child.path} menu={child} />
-            ))}
+            {menu.children
+              .filter((child) => canRead(child.path))
+              .map((child) => (
+                <MenuItem key={child.path} menu={child} canRead={canRead} />
+              ))}
           </ul>
         </div>
       )}
@@ -91,6 +94,8 @@ function MenuItem({ menu }) {
 }
 
 export default function Sidebar({ isOpen = true }) {
+  const [session] = useSession();
+  const canRead = (path) => can(session, path, "read");
   return (
     <div
       className={`fixed top-0 bottom-0 left-0 right-0 lg:right-auto
@@ -101,11 +106,18 @@ export default function Sidebar({ isOpen = true }) {
       {/* mt-20 clears the navbar, so the scroll area is the rest of the viewport */}
       <div className="overflow-y-auto px-2 pb-4 h-[calc(100%-5rem)] mt-20 scrollsidebarClass">
         <ul className="space-y-1">
-          {menus.map((menu) => (
-            <MenuItem key={menu.label} menu={menu} />
-          ))}
+          {menus
+            .filter((menu) =>
+              menu.path
+                ? canRead(menu.path)
+                : menu.children?.some((child) => canRead(child.path))
+            )
+            .map((menu) => (
+              <MenuItem key={menu.label} menu={menu} canRead={canRead} />
+            ))}
         </ul>
       </div>
     </div>
   );
 }
+

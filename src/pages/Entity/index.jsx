@@ -2,10 +2,12 @@ import { Icon } from "@iconify/react";
 import { useState } from "react";
 import Pagination from "../../components/Pagination";
 import useLocalState from "../../hooks/useLocalState";
-import useSession, { isSuperuser } from "../../hooks/useSession";
+import useSession, { can, isSuperuser } from "../../hooks/useSession";
 import EntityForm from "./form";
 
 const PER_PAGE = 10;
+// matches the menu path in constants/menus.json — read permission for this page
+const PERM_PATH = "/entity";
 // No seeds — localStorage is the only source of data
 export const SEED = [];
 const inputClass =
@@ -21,6 +23,9 @@ export default function Entity() {
   const [notice, setNotice] = useState(null);
   const [page, setPage] = useState(1);
   const [session] = useSession();
+  const canCreate = can(session, PERM_PATH, "create");
+  const canUpdate = can(session, PERM_PATH, "update");
+  const canDelete = can(session, PERM_PATH, "delete");
   const query = search.toLowerCase();
   // An entity has no parent — a session sees the entities it belongs to, superuser sees all
   const visible = (entity) =>
@@ -73,17 +78,19 @@ export default function Entity() {
     <div className="mx-auto min-h-screen p-4">
       <div className="mb-4 flex items-center justify-between gap-2">
         <h1 className="text-2xl font-bold text-primary">Manajemen Entity</h1>
-        <button
-          type="button"
-          onClick={() => {
-            setEditing(null);
-            setShowForm(true);
-          }}
-          className="flex items-center rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-700"
-        >
-          <Icon icon="fa6-solid:plus" className="mr-2 h-3 w-3" />
-          Tambah Entity
-        </button>
+        {canCreate && (
+          <button
+            type="button"
+            onClick={() => {
+              setEditing(null);
+              setShowForm(true);
+            }}
+            className="flex items-center rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-700"
+          >
+            <Icon icon="fa6-solid:plus" className="mr-2 h-3 w-3" />
+            Tambah Entity
+          </button>
+        )}
       </div>
       {notice && (
         <div className="mb-4 flex items-center justify-between rounded-lg bg-green-50 px-4 py-3 text-sm text-green-800">
@@ -98,7 +105,7 @@ export default function Entity() {
         </div>
       )}
       <div className="mb-4 flex justify-end">
-        <input
+        <input autoComplete="off"
           type="text"
           aria-label="Cari Entity"
           placeholder="Cari nama atau nama singkat..."
@@ -147,30 +154,34 @@ export default function Entity() {
                 <td className="px-6 py-3">{formatDate(entity.createdAt)}</td>
                 <td className="px-6 py-3">
                   <div className="flex justify-center gap-2">
-                    <button
-                      type="button"
-                      data-tooltip="Edit"
-                      aria-label="Edit"
-                      onClick={() => {
-                        setEditing(entity);
-                        setShowForm(true);
-                      }}
-                      className="rounded-lg bg-cyan-600 p-2 text-white hover:bg-cyan-700"
-                    >
-                      <Icon
-                        icon="fa6-solid:pen-to-square"
-                        className="h-3 w-3"
-                      />
-                    </button>
-                    <button
-                      type="button"
-                      data-tooltip="Hapus"
-                      aria-label="Hapus"
-                      onClick={() => setToDelete(entity)}
-                      className="rounded-lg bg-red-600 p-2 text-white hover:bg-red-700"
-                    >
-                      <Icon icon="fa6-solid:trash" className="h-3 w-3" />
-                    </button>
+                    {canUpdate && (
+                      <button
+                        type="button"
+                        data-tooltip="Edit"
+                        aria-label="Edit"
+                        onClick={() => {
+                          setEditing(entity);
+                          setShowForm(true);
+                        }}
+                        className="rounded-lg bg-cyan-600 p-2 text-white hover:bg-cyan-700"
+                      >
+                        <Icon
+                          icon="fa6-solid:pen-to-square"
+                          className="h-3 w-3"
+                        />
+                      </button>
+                    )}
+                    {canDelete && (
+                      <button
+                        type="button"
+                        data-tooltip="Hapus"
+                        aria-label="Hapus"
+                        onClick={() => setToDelete(entity)}
+                        className="rounded-lg bg-red-600 p-2 text-white hover:bg-red-700"
+                      >
+                        <Icon icon="fa6-solid:trash" className="h-3 w-3" />
+                      </button>
+                    )}
                   </div>
                 </td>
               </tr>

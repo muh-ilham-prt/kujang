@@ -110,7 +110,7 @@ export default function EmployeeForm({
                 <label htmlFor="mem_empy_pict" className={labelClass}>
                   Foto Profil
                 </label>
-                <input
+                <input autoComplete="off"
                   id="mem_empy_pict"
                   type="file"
                   accept="image/*"
@@ -123,7 +123,7 @@ export default function EmployeeForm({
                 <label htmlFor="mem_empy_nip" className={labelClass}>
                   NIP
                 </label>
-                <input
+                <input autoComplete="off"
                   id="mem_empy_nip"
                   value={formData.mem_empy_nip}
                   onChange={(e) => field("mem_empy_nip", e.target.value)}
@@ -141,7 +141,7 @@ export default function EmployeeForm({
                 <label htmlFor="mem_empy_name" className={labelClass}>
                   Nama
                 </label>
-                <input
+                <input autoComplete="off"
                   id="mem_empy_name"
                   value={formData.mem_empy_name}
                   onChange={(e) => field("mem_empy_name", e.target.value)}
@@ -155,7 +155,7 @@ export default function EmployeeForm({
                 <label htmlFor="mem_account_phone" className={labelClass}>
                   Telepon
                 </label>
-                <input
+                <input autoComplete="off"
                   id="mem_account_phone"
                   type="tel"
                   inputMode="numeric"
@@ -176,7 +176,7 @@ export default function EmployeeForm({
                 <label htmlFor="mem_empy_upper" className={labelClass}>
                   Atasan
                 </label>
-                <select
+                <select autoComplete="off"
                   id="mem_empy_upper"
                   value={formData.mem_empy_upper}
                   onChange={(e) => field("mem_empy_upper", e.target.value)}
@@ -196,7 +196,7 @@ export default function EmployeeForm({
                   <label htmlFor={name} className={labelClass}>
                     {label}
                   </label>
-                  <select
+                  <select autoComplete="off"
                     id={name}
                     value={formData[name]}
                     onChange={(e) => field(name, e.target.value)}

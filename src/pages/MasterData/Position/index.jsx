@@ -3,6 +3,7 @@ import { useState } from "react";
 import Pagination from "../../../components/Pagination";
 import useLocalState from "../../../hooks/useLocalState";
 import useSession, {
+  can,
   inScope,
   isSuperuser,
   useEntities,
@@ -10,6 +11,8 @@ import useSession, {
 import PositionForm from "./form";
 
 const PER_PAGE = 10;
+// matches the menu path in constants/menus.json
+const PERM_PATH = "/master/position";
 
 // Positions come from this module — other modules read them instead of hardcoding options.
 export const usePositions = () => {
@@ -26,7 +29,10 @@ export const usePositions = () => {
 export default function Position() {
   // No seeds — localStorage is the only source of data
   const [positions, setPositions] = useLocalState("positions", []);
-  const [session] = useSession();
+    const [session] = useSession();
+    const canCreate = can(session, PERM_PATH, "create");
+    const canUpdate = can(session, PERM_PATH, "update");
+    const canDelete = can(session, PERM_PATH, "delete");
   const { entityNames } = useEntities();
   // Entity scope is only meaningful to a superuser or an account spanning several entities
   const canSeeEntities =
@@ -84,6 +90,7 @@ export default function Position() {
     <div className="min-h-screen mx-auto p-4">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold text-primary">Manajemen Jabatan</h1>
+        {canCreate && (
         <button
           type="button"
           onClick={() => {
@@ -95,6 +102,7 @@ export default function Position() {
           <Icon icon="fa6-solid:plus" className="mr-2 h-3 w-3" />
           Tambah Jabatan
         </button>
+        )}
       </div>
 
       {successMessage && (
@@ -137,6 +145,7 @@ export default function Position() {
                   <td className="px-6 py-3">{entityNames(position.entities)}</td>
                 )}
                 <td className="flex items-center justify-center gap-2 px-6 py-3">
+                  {canUpdate && (
                   <button
                     type="button"
                     data-tooltip="Edit"
@@ -149,6 +158,8 @@ export default function Position() {
                   >
                     <Icon icon="fa6-solid:pen-to-square" className="h-3 w-3" />
                   </button>
+                  )}
+                  {canDelete && (
                   <button
                     type="button"
                     data-tooltip="Hapus"
@@ -158,6 +169,7 @@ export default function Position() {
                   >
                     <Icon icon="fa6-solid:trash" className="h-3 w-3" />
                   </button>
+                  )}
                 </td>
               </tr>
             ))}

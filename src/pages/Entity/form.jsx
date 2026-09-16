@@ -1,7 +1,7 @@
 import { Icon } from "@iconify/react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   MapContainer,
   Marker,
@@ -49,11 +49,19 @@ const labelClass = "mb-1 block text-sm font-medium text-slate-700";
 export default function EntityForm({ show, onClose, onSubmit, initialData }) {
   const [formData, setFormData] = useState(EMPTY);
   const [preview, setPreview] = useState(null);
+  const [geo, setGeo] = useState(null);
+  const timer = useRef(null);
+  const seq = useRef(0);
 
   useEffect(() => {
     setFormData(initialData ? { ...EMPTY, ...initialData } : EMPTY);
     setPreview(null);
+    setGeo(null);
+    clearTimeout(timer.current);
+    seq.current++; // drop any in-flight lookup from the previous open
   }, [initialData, show]);
+
+  useEffect(() => () => clearTimeout(timer.current), []);
 
   // Object URLs leak until revoked — drop the old one whenever the preview changes.
   useEffect(() => () => preview && URL.revokeObjectURL(preview), [preview]);
@@ -82,6 +90,31 @@ export default function EntityForm({ show, onClose, onSubmit, initialData }) {
     formData.lat && formData.lon && !isNaN(lat) && !isNaN(lon)
       ? [lat, lon]
       : null;
+
+  const searchAddress = async (query, request) => {
+    setGeo("loading");
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`
+      );
+      if (!response.ok) throw new Error("Geocoding failed");
+      const [result] = await response.json();
+      if (request !== seq.current) return;
+      if (!result) return setGeo("notfound");
+      pick(Number(result.lat), Number(result.lon));
+      setGeo(null);
+    } catch {
+      if (request === seq.current) setGeo("error");
+    }
+  };
+
+  const scheduleAddressSearch = (value) => {
+    clearTimeout(timer.current);
+    const request = ++seq.current;
+    const query = value.trim();
+    if (!query) return setGeo(null);
+    timer.current = setTimeout(() => searchAddress(query, request), 1000);
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -131,7 +164,7 @@ export default function EntityForm({ show, onClose, onSubmit, initialData }) {
                     <Icon icon="fa6-solid:upload" className="mr-2 h-3 w-3" />
                     Pilih Gambar
                   </label>
-                  <input
+                  <input autoComplete="off"
                     id="entity-image"
                     type="file"
                     accept="image/*"
@@ -160,7 +193,7 @@ export default function EntityForm({ show, onClose, onSubmit, initialData }) {
                 <label htmlFor="entity-name" className={labelClass}>
                   Nama
                 </label>
-                <input
+                <input autoComplete="off"
                   id="entity-name"
                   value={formData.name}
                   onChange={(e) => field("name", e.target.value)}
@@ -172,7 +205,7 @@ export default function EntityForm({ show, onClose, onSubmit, initialData }) {
                 <label htmlFor="entity-short-name" className={labelClass}>
                   Nama Singkat
                 </label>
-                <input
+                <input autoComplete="off"
                   id="entity-short-name"
                   value={formData.shortName}
                   onChange={(e) => field("shortName", e.target.value)}
@@ -186,7 +219,7 @@ export default function EntityForm({ show, onClose, onSubmit, initialData }) {
               <label htmlFor="entity-phone" className={labelClass}>
                 Telepon
               </label>
-              <input
+              <input autoComplete="off"
                 id="entity-phone"
                 type="tel"
                 value={formData.phone}
@@ -200,21 +233,33 @@ export default function EntityForm({ show, onClose, onSubmit, initialData }) {
               <label htmlFor="entity-address" className={labelClass}>
                 Alamat
               </label>
-              <textarea
+              <textarea autoComplete="off"
                 id="entity-address"
                 value={formData.address}
                 onChange={(e) => field("address", e.target.value)}
+                onKeyUp={(e) => scheduleAddressSearch(e.target.value)}
                 rows={3}
                 required
                 className={inputClass}
               />
+              {geo && (
+                <p
+                  role="status"
+                  aria-live="polite"
+                  className="mt-1 text-xs text-slate-500"
+                >
+                  {geo === "loading" && "Mencari…"}
+                  {geo === "notfound" && "Alamat tidak ditemukan"}
+                  {geo === "error" && "Gagal menghubungi layanan peta"}
+                </p>
+              )}
             </div>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
                 <label htmlFor="entity-lat" className={labelClass}>
                   Latitude
                 </label>
-                <input
+                <input autoComplete="off"
                   id="entity-lat"
                   value={formData.lat}
                   onChange={(e) => field("lat", e.target.value)}
@@ -227,7 +272,7 @@ export default function EntityForm({ show, onClose, onSubmit, initialData }) {
                 <label htmlFor="entity-lon" className={labelClass}>
                   Longitude
                 </label>
-                <input
+                <input autoComplete="off"
                   id="entity-lon"
                   value={formData.lon}
                   onChange={(e) => field("lon", e.target.value)}
@@ -278,17 +323,17 @@ export default function EntityForm({ show, onClose, onSubmit, initialData }) {
           </div>
           <div className="sticky bottom-0 flex justify-end gap-2 border-t border-slate-200 bg-white px-6 py-4">
             <button
-              type="submit"
-              className="rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-700"
-            >
-              Simpan
-            </button>
-            <button
               type="button"
               onClick={onClose}
               className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
             >
               Batal
+            </button>
+            <button
+              type="submit"
+              className="rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-700"
+            >
+              Simpan
             </button>
           </div>
         </form>

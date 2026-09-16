@@ -3,6 +3,7 @@ import { useState } from "react";
 import Pagination from "../../../components/Pagination";
 import useLocalState from "../../../hooks/useLocalState";
 import useSession, {
+  can,
   inScope,
   isSuperuser,
   useEntities,
@@ -18,6 +19,8 @@ import {
 import LeaveForm from "./form";
 
 const PER_PAGE = 10;
+// matches the menu path in constants/menus.json
+const PERM_PATH = "/master/leave";
 
 const EMPTY_FILTERS = { status: "", search: "" };
 
@@ -28,7 +31,10 @@ export default function Leave() {
   const [tab, setTab] = useState("leave");
   // No seeds — localStorage is the only source of data
   const [leaves, setLeaves] = useLocalState("leaves", []);
-  const [session] = useSession();
+    const [session] = useSession();
+    const canCreate = can(session, PERM_PATH, "create");
+    const canUpdate = can(session, PERM_PATH, "update");
+    const canDelete = can(session, PERM_PATH, "delete");
   const { entityNames } = useEntities();
   const employeeOptions = useEmployees();
   const leaveTypeOptions = useLeaveTypes();
@@ -148,6 +154,7 @@ export default function Leave() {
       ) : (
         <>
           <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+            {canCreate && (
             <button
               type="button"
               onClick={() => {
@@ -159,8 +166,9 @@ export default function Leave() {
               <Icon icon="fa6-solid:plus" className="mr-2 h-3 w-3" />
               Tambah Pengajuan Cuti
             </button>
+            )}
             <div className="flex flex-wrap gap-2">
-              <input
+              <input autoComplete="off"
                 type="text"
                 aria-label="Cari Karyawan"
                 placeholder="Cari nama atau NIP..."
@@ -168,7 +176,7 @@ export default function Leave() {
                 onChange={(e) => setFilter("search", e.target.value)}
                 className={filterInputClass}
               />
-              <select
+              <select autoComplete="off"
                 aria-label="Filter Status"
                 value={filters.status}
                 onChange={(e) => setFilter("status", e.target.value)}
@@ -246,6 +254,7 @@ export default function Leave() {
                       </td>
                       <td className="px-6 py-3">
                         <div className="flex items-center justify-center gap-2">
+                          {canUpdate && (
                           <button
                             type="button"
                             data-tooltip="Edit"
@@ -261,6 +270,8 @@ export default function Leave() {
                               className="h-3 w-3"
                             />
                           </button>
+                          )}
+                          {canDelete && (
                           <button
                             type="button"
                             data-tooltip="Hapus"
@@ -270,6 +281,7 @@ export default function Leave() {
                           >
                             <Icon icon="fa6-solid:trash" className="h-3 w-3" />
                           </button>
+                          )}
                         </div>
                       </td>
                     </tr>

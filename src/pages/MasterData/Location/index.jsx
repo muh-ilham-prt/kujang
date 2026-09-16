@@ -5,6 +5,7 @@ import MultiSelect from "../../../components/MultiSelect";
 import Pagination from "../../../components/Pagination";
 import useLocalState from "../../../hooks/useLocalState";
 import useSession, {
+  can,
   inScope,
   isSuperuser,
   useEntities,
@@ -13,6 +14,8 @@ import { useClients } from "../Client";
 import LocationForm from "./form";
 
 const PER_PAGE = 10;
+// matches the menu path in constants/menus.json
+const PERM_PATH = "/master/location";
 
 // ponytail: mirrors the form's static options — both come from the API later
 const LOCATION_TYPES = [
@@ -50,7 +53,10 @@ const filterInputClass =
 export default function Location() {
   // No seeds — localStorage is the only source of data
   const [locations, setLocations] = useLocalState("locations", []);
-  const [session] = useSession();
+    const [session] = useSession();
+    const canCreate = can(session, PERM_PATH, "create");
+    const canUpdate = can(session, PERM_PATH, "update");
+    const canDelete = can(session, PERM_PATH, "delete");
   const { entityNames } = useEntities();
   const clientOptions = useClients();
   // Entity scope is only meaningful to a superuser or an account spanning several entities
@@ -143,6 +149,7 @@ export default function Location() {
     <div className="min-h-screen mx-auto p-4">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold text-primary">Manajemen Lokasi</h1>
+        {canCreate && (
         <button
           type="button"
           onClick={() => {
@@ -154,6 +161,7 @@ export default function Location() {
           <Icon icon="fa6-solid:plus" className="mr-2 h-3 w-3" />
           Tambah Lokasi
         </button>
+        )}
       </div>
 
       {successMessage && (
@@ -192,7 +200,7 @@ export default function Location() {
             >
               Jenis Lokasi
             </label>
-            <select
+            <select autoComplete="off"
               id="filter-type"
               value={filters.type}
               onChange={(e) => setFilter("type", e.target.value)}
@@ -214,7 +222,7 @@ export default function Location() {
             >
               Pencarian
             </label>
-            <input
+            <input autoComplete="off"
               id="filter-search"
               type="text"
               placeholder="Cari nama lokasi atau singkatan..."
@@ -307,6 +315,7 @@ export default function Location() {
                     >
                       <Icon icon="fa6-solid:qrcode" className="h-3 w-3" />
                     </button>
+                    {canUpdate && (
                     <button
                       type="button"
                       data-tooltip="Edit"
@@ -319,6 +328,8 @@ export default function Location() {
                     >
                       <Icon icon="fa6-solid:pen-to-square" className="h-3 w-3" />
                     </button>
+                    )}
+                    {canDelete && (
                     <button
                       type="button"
                       data-tooltip="Hapus"
@@ -328,6 +339,7 @@ export default function Location() {
                     >
                       <Icon icon="fa6-solid:trash" className="h-3 w-3" />
                     </button>
+                    )}
                   </div>
                 </td>
               </tr>

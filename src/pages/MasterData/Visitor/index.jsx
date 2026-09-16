@@ -3,6 +3,7 @@ import { useState } from "react";
 import Pagination from "../../../components/Pagination";
 import useLocalState from "../../../hooks/useLocalState";
 import useSession, {
+  can,
   inScope,
   isSuperuser,
   useEntities,
@@ -10,6 +11,8 @@ import useSession, {
 import VisitorStatus from "./components/status";
 
 const PER_PAGE = 10;
+// matches the menu path in constants/menus.json
+const PERM_PATH = "/master/guest";
 
 // Visitor class drives both the badge colour and whether a vehicle is shown.
 const CLASS_BADGE = {
@@ -28,6 +31,8 @@ export default function Visitor() {
   // No seeds — visitors are registered by the guard app, this page only reads them
   const [visitors, setVisitors] = useLocalState("visitors", []);
   const [session] = useSession();
+  const canUpdate = can(session, PERM_PATH, "update");
+  const canDelete = can(session, PERM_PATH, "delete");
   const { entityNames } = useEntities();
   // Entity scope is only meaningful to a superuser or an account spanning several entities
   const canSeeEntities =
@@ -92,7 +97,7 @@ export default function Visitor() {
       )}
 
       <div className="mb-4 flex flex-wrap justify-end gap-2">
-        <input
+        <input autoComplete="off"
           type="text"
           aria-label="Cari Nama Tamu"
           placeholder="Cari dengan nama..."
@@ -165,6 +170,7 @@ export default function Visitor() {
                   </td>
                   <td className="px-6 py-3">
                     <div className="flex items-center justify-center gap-2">
+                      {canUpdate && (
                       <button
                         type="button"
                         data-tooltip="Ubah Status"
@@ -177,6 +183,8 @@ export default function Visitor() {
                           className="h-3 w-3"
                         />
                       </button>
+                      )}
+                      {canDelete && (
                       <button
                         type="button"
                         data-tooltip="Hapus"
@@ -186,6 +194,7 @@ export default function Visitor() {
                       >
                         <Icon icon="fa6-solid:trash" className="h-3 w-3" />
                       </button>
+                      )}
                     </div>
                   </td>
                 </tr>

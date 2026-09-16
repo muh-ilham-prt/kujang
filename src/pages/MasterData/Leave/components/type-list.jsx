@@ -98,7 +98,7 @@ export default function LeaveTypeList({ onNotify }) {
           <Icon icon="fa6-solid:plus" className="mr-2 h-3 w-3" />
           Tambah Jenis Cuti
         </button>
-        <input
+        <input autoComplete="off"
           type="text"
           aria-label="Cari Jenis Cuti"
           placeholder="Cari jenis cuti..."

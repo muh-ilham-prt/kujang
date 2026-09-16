@@ -65,7 +65,7 @@ export default function HostForm({ show, onClose, onSubmit, initialData }) {
               <label htmlFor="mcr_customer" className={labelClass}>
                 Klien
               </label>
-              <select
+              <select autoComplete="off"
                 id="mcr_customer"
                 value={formData.mcr_customer}
                 onChange={(e) => field("mcr_customer", e.target.value)}
@@ -99,7 +99,7 @@ export default function HostForm({ show, onClose, onSubmit, initialData }) {
                 <label htmlFor="mcr_cust_name" className={labelClass}>
                   Nama Penerima Tamu
                 </label>
-                <input
+                <input autoComplete="off"
                   id="mcr_cust_name"
                   value={formData.mcr_cust_name}
                   onChange={(e) => field("mcr_cust_name", e.target.value)}
@@ -113,7 +113,7 @@ export default function HostForm({ show, onClose, onSubmit, initialData }) {
                 <label htmlFor="mcm_phone_hp" className={labelClass}>
                   No. Telepon
                 </label>
-                <input
+                <input autoComplete="off"
                   id="mcm_phone_hp"
                   type="tel"
                   inputMode="numeric"
@@ -132,7 +132,7 @@ export default function HostForm({ show, onClose, onSubmit, initialData }) {
               <label htmlFor="mcm_division" className={labelClass}>
                 Divisi
               </label>
-              <input
+              <input autoComplete="off"
                 id="mcm_division"
                 value={formData.mcm_division}
                 onChange={(e) => field("mcm_division", e.target.value)}

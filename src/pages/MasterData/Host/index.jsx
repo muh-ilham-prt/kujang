@@ -4,6 +4,7 @@ import MultiSelect from "../../../components/MultiSelect";
 import Pagination from "../../../components/Pagination";
 import useLocalState from "../../../hooks/useLocalState";
 import useSession, {
+  can,
   inScope,
   isSuperuser,
   useEntities,
@@ -12,6 +13,8 @@ import { useClients } from "../Client";
 import HostForm from "./form";
 
 const PER_PAGE = 10;
+// matches the menu path in constants/menus.json
+const PERM_PATH = "/master/host";
 
 const labelOf = (options, value) =>
   options.find((o) => o.value === String(value))?.label || "-";
@@ -25,7 +28,10 @@ const filterInputClass =
 export default function Host() {
   // No seeds — localStorage is the only source of data
   const [hosts, setHosts] = useLocalState("hosts", []);
-  const [session] = useSession();
+    const [session] = useSession();
+    const canCreate = can(session, PERM_PATH, "create");
+    const canUpdate = can(session, PERM_PATH, "update");
+    const canDelete = can(session, PERM_PATH, "delete");
   const { entityNames } = useEntities();
   const clientOptions = useClients();
   // Entity scope is only meaningful to a superuser or an account spanning several entities
@@ -97,6 +103,7 @@ export default function Host() {
         <h1 className="text-2xl font-bold text-primary">
           Manajemen Penerima Tamu
         </h1>
+        {canCreate && (
         <button
           type="button"
           onClick={() => {
@@ -108,6 +115,7 @@ export default function Host() {
           <Icon icon="fa6-solid:plus" className="mr-2 h-3 w-3" />
           Tambah Penerima Tamu
         </button>
+        )}
       </div>
 
       {successMessage && (
@@ -125,7 +133,7 @@ export default function Host() {
       )}
 
       <div className="mb-4 flex flex-wrap justify-end gap-2">
-        <input
+        <input autoComplete="off"
           type="text"
           aria-label="Cari Nama Penerima Tamu"
           placeholder="Cari nama penerima tamu..."
@@ -177,6 +185,7 @@ export default function Host() {
                 <td className="px-6 py-3">{host.mcm_division}</td>
                 <td className="px-6 py-3">
                   <div className="flex items-center justify-center gap-2">
+                    {canUpdate && (
                     <button
                       type="button"
                       data-tooltip="Edit"
@@ -189,6 +198,8 @@ export default function Host() {
                     >
                       <Icon icon="fa6-solid:pen-to-square" className="h-3 w-3" />
                     </button>
+                    )}
+                    {canDelete && (
                     <button
                       type="button"
                       data-tooltip="Hapus"
@@ -198,6 +209,7 @@ export default function Host() {
                     >
                       <Icon icon="fa6-solid:trash" className="h-3 w-3" />
                     </button>
+                    )}
                   </div>
                 </td>
               </tr>

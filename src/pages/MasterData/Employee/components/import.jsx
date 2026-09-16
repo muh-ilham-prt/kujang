@@ -111,7 +111,7 @@ export default function EmployeeImport({ show, onClose, onImport }) {
 
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <input
+              <input autoComplete="off"
                 id="send-whatsapp"
                 type="checkbox"
                 checked={sendWhatsApp}
@@ -134,7 +134,7 @@ export default function EmployeeImport({ show, onClose, onImport }) {
           </div>
 
           <div>
-            <input
+            <input autoComplete="off"
               id="import-file"
               type="file"
               accept=".xlsx,.xls"

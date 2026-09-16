@@ -63,7 +63,7 @@ export default function LeaveTypeForm({ show, onClose, onSubmit, initialData }) 
               <label htmlFor="meat_abs_type_name" className={labelClass}>
                 Nama Jenis Cuti
               </label>
-              <input
+              <input autoComplete="off"
                 id="meat_abs_type_name"
                 value={formData.meat_abs_type_name}
                 onChange={(e) => field("meat_abs_type_name", e.target.value)}
@@ -77,7 +77,7 @@ export default function LeaveTypeForm({ show, onClose, onSubmit, initialData }) 
               <label htmlFor="meat_abs_type_desc" className={labelClass}>
                 Deskripsi
               </label>
-              <textarea
+              <textarea autoComplete="off"
                 id="meat_abs_type_desc"
                 value={formData.meat_abs_type_desc}
                 onChange={(e) => field("meat_abs_type_desc", e.target.value)}
@@ -92,7 +92,7 @@ export default function LeaveTypeForm({ show, onClose, onSubmit, initialData }) 
                 <label htmlFor="meat_quota_default" className={labelClass}>
                   Quota Awal (hari)
                 </label>
-                <input
+                <input autoComplete="off"
                   id="meat_quota_default"
                   type="number"
                   min={0}
@@ -110,7 +110,7 @@ export default function LeaveTypeForm({ show, onClose, onSubmit, initialData }) 
                 <label htmlFor="meat_quota_period" className={labelClass}>
                   Periode Quota
                 </label>
-                <select
+                <select autoComplete="off"
                   id="meat_quota_period"
                   value={formData.meat_quota_period}
                   onChange={(e) => field("meat_quota_period", e.target.value)}

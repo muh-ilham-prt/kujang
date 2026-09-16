@@ -2,7 +2,7 @@ import { Icon } from "@iconify/react";
 import "chart.js/auto";
 import { Bar } from "react-chartjs-2";
 
-// ponytail: static — swap for a real dashboard API call when the backend is ready
+// ponytail: static and locked — enable interactions when the dashboard API lands
 const ATTENDANCE_WEEK = [
   { date: "Sen", attendanceCount: 24 },
   { date: "Sel", attendanceCount: 26 },
@@ -43,7 +43,7 @@ const options = {
 
 export default function ChartAttendanceWeek() {
   return (
-    <div className="w-full bg-white rounded-xl py-4 shadow-md flex flex-col gap-3 text-slate-900">
+    <div className="w-full bg-white rounded-xl py-4 shadow-md flex flex-col gap-3 text-slate-900 opacity-60 grayscale pointer-events-none">
       <div className="flex items-center justify-between flex-wrap lg:flex-nowrap gap-3 border-b border-b-slate-300 pb-3 px-6">
         <div className="flex-1 flex gap-3 items-center">
           <div className="p-2 bg-purple-700 text-white rounded-full">
@@ -53,6 +53,10 @@ export default function ChartAttendanceWeek() {
             Kehadiran Mingguan
           </h5>
         </div>
+        <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-500">
+          <Icon icon="fa6-solid:lock" className="h-3 w-3" />
+          Belum Aktif
+        </span>
       </div>
 
       <div className="w-full px-4">

@@ -16,7 +16,7 @@ const markerIcon = new L.Icon({
   popupAnchor: [0, -32],
 });
 
-// ponytail: static — swap for a real location-tracking API call when the backend is ready
+// ponytail: static and locked — enable interactions when the location-tracking API lands
 const LOCATIONS = [
   { id: 1, name: "Karyawan 1", latitude: -6.6664353, longitude: 106.8519632 },
 ];
@@ -34,7 +34,7 @@ function BoundsUpdater({ locations }) {
 
 export default function MapEmployee() {
   return (
-    <div className="w-full bg-white rounded-xl py-4 shadow-md flex flex-col gap-3 text-slate-900 overflow-hidden">
+    <div className="w-full bg-white rounded-xl py-4 shadow-md flex flex-col gap-3 text-slate-900 overflow-hidden opacity-60 grayscale pointer-events-none">
       <div className="flex items-center justify-between flex-wrap lg:flex-nowrap gap-3 border-b border-b-slate-300 pb-3 px-6">
         <div className="flex-1 flex gap-3 items-center">
           <div className="p-2 bg-purple-700 text-white rounded-full">
@@ -55,15 +55,21 @@ export default function MapEmployee() {
           </div>
         </div>
 
-        <Link to="/map">
-          <button
-            type="button"
-            className="flex items-center rounded-lg bg-purple-700 hover:bg-purple-800 px-3 py-2 text-sm font-medium text-white transition-colors"
-          >
-            <Icon icon="heroicons-outline:map" className="mr-2 h-4 w-4" />
-            Buka Peta Penuh
-          </button>
-        </Link>
+        <div className="flex items-center gap-3">
+          <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-500">
+            <Icon icon="fa6-solid:lock" className="h-3 w-3" />
+            Belum Aktif
+          </span>
+          <Link to="/map">
+            <button
+              type="button"
+              className="flex items-center rounded-lg bg-purple-700 hover:bg-purple-800 px-3 py-2 text-sm font-medium text-white transition-colors"
+            >
+              <Icon icon="heroicons-outline:map" className="mr-2 h-4 w-4" />
+              Buka Peta Penuh
+            </button>
+          </Link>
+        </div>
       </div>
 
       <div className="px-6">

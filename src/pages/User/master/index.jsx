@@ -3,6 +3,7 @@ import { useState } from "react";
 import Pagination from "../../../components/Pagination";
 import useLocalState from "../../../hooks/useLocalState";
 import useSession, {
+  can,
   inScope,
   isSuperuser,
   useEntities,
@@ -10,6 +11,8 @@ import useSession, {
 import UserForm, { useRoles } from "./form";
 
 const PER_PAGE = 10;
+// matches the menu path in constants/menus.json
+const PERM_PATH = "/user";
 
 // The built-in account that owns the Superuser role. Not deletable.
 // ponytail: password is a demo placeholder — the API must issue and hash it instead
@@ -41,6 +44,9 @@ export default function User() {
   const users = ensureSuperUser(stored);
   const ROLES = useRoles();
   const [session] = useSession();
+  const canCreate = can(session, PERM_PATH, "create");
+  const canUpdate = can(session, PERM_PATH, "update");
+  const canDelete = can(session, PERM_PATH, "delete");
   const { entityNames } = useEntities();
   // Entity scope is only meaningful to a superuser or an account spanning several entities
   const canSeeEntities =
@@ -115,17 +121,19 @@ export default function User() {
     <div className="min-h-screen mx-auto p-4">
       <div className="mb-4 flex items-center justify-between gap-2">
         <h1 className="text-2xl font-bold text-primary">Manajemen User</h1>
-        <button
-          type="button"
-          onClick={() => {
-            setEditing(null);
-            setShowForm(true);
-          }}
-          className="flex items-center rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-700"
-        >
-          <Icon icon="fa6-solid:plus" className="mr-2 h-3 w-3" />
-          Tambah User
-        </button>
+        {canCreate && (
+          <button
+            type="button"
+            onClick={() => {
+              setEditing(null);
+              setShowForm(true);
+            }}
+            className="flex items-center rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-700"
+          >
+            <Icon icon="fa6-solid:plus" className="mr-2 h-3 w-3" />
+            Tambah User
+          </button>
+        )}
       </div>
 
       {successMessage && (
@@ -143,7 +151,7 @@ export default function User() {
       )}
 
       <div className="mb-4 flex flex-wrap justify-end gap-2">
-        <input
+        <input autoComplete="off"
           type="text"
           aria-label="Cari User"
           placeholder="Cari username atau email..."
@@ -154,7 +162,7 @@ export default function User() {
           }}
           className={filterInputClass}
         />
-        <select
+        <select autoComplete="off"
           aria-label="Filter Role"
           value={role}
           onChange={(e) => {
@@ -219,30 +227,34 @@ export default function User() {
                         </span>
                       ) : (
                         <>
-                          <button
-                            type="button"
-                            data-tooltip="Edit"
-                            aria-label="Edit"
-                            onClick={() => {
-                              setEditing(user);
-                              setShowForm(true);
-                            }}
-                            className="rounded-lg bg-cyan-600 p-2 text-white hover:bg-cyan-700"
-                          >
-                            <Icon
-                              icon="fa6-solid:pen-to-square"
-                              className="h-3 w-3"
-                            />
-                          </button>
-                          <button
-                            type="button"
-                            data-tooltip="Hapus"
-                            aria-label="Hapus"
-                            onClick={() => setToDelete(user)}
-                            className="rounded-lg bg-red-600 p-2 text-white hover:bg-red-700"
-                          >
-                            <Icon icon="fa6-solid:trash" className="h-3 w-3" />
-                          </button>
+                          {canUpdate && (
+                            <button
+                              type="button"
+                              data-tooltip="Edit"
+                              aria-label="Edit"
+                              onClick={() => {
+                                setEditing(user);
+                                setShowForm(true);
+                              }}
+                              className="rounded-lg bg-cyan-600 p-2 text-white hover:bg-cyan-700"
+                            >
+                              <Icon
+                                icon="fa6-solid:pen-to-square"
+                                className="h-3 w-3"
+                              />
+                            </button>
+                          )}
+                          {canDelete && (
+                            <button
+                              type="button"
+                              data-tooltip="Hapus"
+                              aria-label="Hapus"
+                              onClick={() => setToDelete(user)}
+                              className="rounded-lg bg-red-600 p-2 text-white hover:bg-red-700"
+                            >
+                              <Icon icon="fa6-solid:trash" className="h-3 w-3" />
+                            </button>
+                          )}
                         </>
                       )}
                     </div>

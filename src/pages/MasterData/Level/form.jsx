@@ -60,7 +60,7 @@ export default function LevelForm({ show, onClose, onSubmit, initialData }) {
               >
                 Nama Level
               </label>
-              <input
+              <input autoComplete="off"
                 id="mel_empy_level_name"
                 value={formData.mel_empy_level_name}
                 onChange={(e) => field("mel_empy_level_name", e.target.value)}
@@ -76,7 +76,7 @@ export default function LevelForm({ show, onClose, onSubmit, initialData }) {
               >
                 Singkatan Level
               </label>
-              <input
+              <input autoComplete="off"
                 id="mel_empy_level_short"
                 value={formData.mel_empy_level_short}
                 onChange={(e) => field("mel_empy_level_short", e.target.value)}

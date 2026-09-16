@@ -9,6 +9,7 @@ export default function ShiftType() {
       title="Manajemen Tipe Waktu Kerja"
       noun="Tipe Waktu Kerja"
       storageKey="shiftTypes"
+      permPath="/master/shift-type"
     />
   );
 }

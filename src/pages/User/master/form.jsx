@@ -1,10 +1,7 @@
 import { useEffect, useState } from "react";
 import MultiSelect from "../../../components/MultiSelect";
 import useLocalState from "../../../hooks/useLocalState";
-import useSession, {
-  isSuperuser,
-  useEntities,
-} from "../../../hooks/useSession";
+import { useEntities } from "../../../hooks/useSession";
 import { SEED as ROLE_SEED, ensureSuperuser } from "../role";
 
 // Roles come from the role module — a role must exist there before a user can hold it.
@@ -19,6 +16,7 @@ export const useRoles = () => {
     color: role.locked
       ? "bg-amber-100 text-amber-800"
       : "bg-slate-100 text-slate-800",
+    entities: role.entities || [],
   }));
 };
 
@@ -38,10 +36,11 @@ export default function UserForm({ show, onClose, onSubmit, initialData }) {
   const [formData, setFormData] = useState(EMPTY);
   // Superuser belongs to the built-in account alone — never offer it in the form
   const roles = useRoles().filter((role) => role.value !== "superuser");
-  const [session] = useSession();
   const { entityOptions } = useEntities();
-  // Only a superuser assigns entity scope to other accounts
-  const canAssignEntities = isSuperuser(session);
+
+  // Entity scope comes from the selected role — its scope is the user's scope.
+  const selectedRole = roles.find((role) => role.value === formData.role);
+  const roleEntities = selectedRole?.entities || [];
 
   useEffect(() => {
     setFormData(initialData ? { ...EMPTY, ...initialData } : EMPTY);
@@ -51,14 +50,18 @@ export default function UserForm({ show, onClose, onSubmit, initialData }) {
 
   const field = (name, value) => setFormData({ ...formData, [name]: value });
 
+  // Selecting a role assigns its entity scope to the user immediately.
+  const changeRole = (value) =>
+    setFormData({
+      ...formData,
+      role: value,
+      entities: roles.find((r) => r.value === value)?.entities || [],
+    });
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Keep the existing scope untouched when the editor cannot change it
-    onSubmit(
-      canAssignEntities
-        ? formData
-        : { ...formData, entities: initialData?.entities || [] }
-    );
+    // Entity scope always follows the selected role — never free-typed here.
+    onSubmit({ ...formData, entities: roleEntities });
   };
 
   return (
@@ -85,7 +88,7 @@ export default function UserForm({ show, onClose, onSubmit, initialData }) {
                 <label htmlFor="username" className={labelClass}>
                   Username
                 </label>
-                <input
+                <input autoComplete="off"
                   id="username"
                   value={formData.username}
                   onChange={(e) => field("username", e.target.value)}
@@ -99,7 +102,7 @@ export default function UserForm({ show, onClose, onSubmit, initialData }) {
                 <label htmlFor="email" className={labelClass}>
                   Email
                 </label>
-                <input
+                <input autoComplete="off"
                   id="email"
                   type="email"
                   value={formData.email}
@@ -115,10 +118,10 @@ export default function UserForm({ show, onClose, onSubmit, initialData }) {
               <label htmlFor="role" className={labelClass}>
                 Role
               </label>
-              <select
+              <select autoComplete="off"
                 id="role"
                 value={formData.role}
-                onChange={(e) => field("role", e.target.value)}
+                onChange={(e) => changeRole(e.target.value)}
                 required
                 className={inputClass}
               >
@@ -131,30 +134,32 @@ export default function UserForm({ show, onClose, onSubmit, initialData }) {
               </select>
             </div>
 
-            {canAssignEntities && (
-              <div>
-                <span className={labelClass}>Entity</span>
-                <MultiSelect
-                  id="entities"
-                  options={entityOptions}
-                  value={formData.entities}
-                  onChange={(value) => field("entities", value)}
-                  placeholder="Pilih Entity"
-                />
-              </div>
-            )}
+            <div>
+              <span className={labelClass}>Entity</span>
+              <MultiSelect
+                id="entities"
+                options={entityOptions}
+                value={roleEntities}
+                onChange={() => {}}
+                placeholder="Pilih Role terlebih dahulu"
+                disabled
+              />
+              <p className="mt-1 text-xs text-slate-500">
+                Entity mengikuti scope dari role yang dipilih.
+              </p>
+            </div>
 
             <div>
               <label htmlFor="password" className={labelClass}>
                 Password
               </label>
-              <input
+              <input autoComplete="off"
                 id="password"
                 type="password"
                 value={formData.password}
                 onChange={(e) => field("password", e.target.value)}
                 placeholder="Masukkan Password"
-                minLength={8}
+                minLength={6}
                 required={!initialData}
                 className={inputClass}
               />
@@ -168,17 +173,17 @@ export default function UserForm({ show, onClose, onSubmit, initialData }) {
 
           <div className="sticky bottom-0 flex justify-end gap-2 border-t border-slate-200 bg-white px-6 py-4">
             <button
-              type="submit"
-              className="rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-700"
-            >
-              Simpan
-            </button>
-            <button
               type="button"
               onClick={onClose}
               className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
             >
               Batal
+            </button>
+            <button
+              type="submit"
+              className="rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-700"
+            >
+              Simpan
             </button>
           </div>
         </form>

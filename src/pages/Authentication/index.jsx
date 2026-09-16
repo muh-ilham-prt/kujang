@@ -81,7 +81,7 @@ export default function Login() {
                       icon="fa6-solid:user"
                       className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-500"
                     />
-                    <input
+                    <input autoComplete="off"
                       id="user-id"
                       type="text"
                       placeholder="Masukkan User ID Anda"
@@ -105,7 +105,7 @@ export default function Login() {
                       icon="fa6-solid:lock"
                       className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-500"
                     />
-                    <input
+                    <input autoComplete="off"
                       id="password"
                       type={showPassword ? "text" : "password"}
                       placeholder="Masukkan Password Anda"
@@ -145,7 +145,7 @@ export default function Login() {
                 )}
 
                 <div className="flex items-center gap-2">
-                  <input id="remember" type="checkbox" className="size-4" />
+                  <input autoComplete="off" id="remember" type="checkbox" className="size-4" />
                   <label htmlFor="remember" className="text-base text-gray-900">
                     Ingat Saya
                   </label>

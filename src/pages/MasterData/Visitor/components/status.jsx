@@ -45,7 +45,7 @@ export default function VisitorStatus({ visitor, onClose, onSubmit }) {
               <label htmlFor="mv_vist_status" className="mb-1 block text-sm font-medium text-slate-700">
                 Status Baru
               </label>
-              <select
+              <select autoComplete="off"
                 id="mv_vist_status"
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}

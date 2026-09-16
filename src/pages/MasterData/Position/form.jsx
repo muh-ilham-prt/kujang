@@ -60,7 +60,7 @@ export default function PositionForm({ show, onClose, onSubmit, initialData }) {
               >
                 Nama Jabatan
               </label>
-              <input
+              <input autoComplete="off"
                 id="mep_empy_position_name"
                 value={formData.mep_empy_position_name}
                 onChange={(e) => field("mep_empy_position_name", e.target.value)}
@@ -76,7 +76,7 @@ export default function PositionForm({ show, onClose, onSubmit, initialData }) {
               >
                 Singkatan Jabatan
               </label>
-              <input
+              <input autoComplete="off"
                 id="mep_empy_position_short"
                 value={formData.mep_empy_position_short}
                 onChange={(e) =>

@@ -8,6 +8,16 @@ export default function useSession() {
 
 export const isSuperuser = (session) => session?.role === "superuser";
 
+// Gate UI by the logged-in role's permission matrix: can(session, "/entity", "create").
+// Only Superuser has implicit full access — any other role must have the flag checked.
+export const can = (session, path, action) => {
+  if (isSuperuser(session)) return true;
+  const role = session?.role;
+  if (!role) return false;
+  const stored = JSON.parse(localStorage.getItem("permissions") || "{}");
+  return stored[role]?.[path]?.[action] === true;
+};
+
 // Rows carry the entities they belong to; a session only sees the ones it shares.
 // ponytail: filtering here is cosmetic — the API must scope the query server-side.
 export const inScope = (session, item) => {

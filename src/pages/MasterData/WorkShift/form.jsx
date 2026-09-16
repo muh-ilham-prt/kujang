@@ -118,7 +118,7 @@ export default function WorkShiftForm({
               <label htmlFor="gwh_whtype" className={labelClass}>
                 Tipe Jam Kerja
               </label>
-              <select
+              <select autoComplete="off"
                 id="gwh_whtype"
                 value={formData.gwh_whtype}
                 onChange={(e) => field("gwh_whtype", e.target.value)}
@@ -138,7 +138,7 @@ export default function WorkShiftForm({
               <label htmlFor="gwh_customer" className={labelClass}>
                 Klien
               </label>
-              <select
+              <select autoComplete="off"
                 id="gwh_customer"
                 value={formData.gwh_customer}
                 onChange={(e) => field("gwh_customer", e.target.value)}
@@ -170,7 +170,7 @@ export default function WorkShiftForm({
               <label htmlFor="gwh_work_name" className={labelClass}>
                 Nama
               </label>
-              <input
+              <input autoComplete="off"
                 id="gwh_work_name"
                 value={formData.gwh_work_name}
                 onChange={(e) => field("gwh_work_name", e.target.value)}
@@ -183,7 +183,7 @@ export default function WorkShiftForm({
               <label htmlFor="gwh_work_desc" className={labelClass}>
                 Deskripsi
               </label>
-              <input
+              <input autoComplete="off"
                 id="gwh_work_desc"
                 value={formData.gwh_work_desc}
                 onChange={(e) => field("gwh_work_desc", e.target.value)}
@@ -199,7 +199,7 @@ export default function WorkShiftForm({
                     <label htmlFor={name} className={labelClass}>
                       {label}
                     </label>
-                    <input
+                    <input autoComplete="off"
                       id={name}
                       type="time"
                       value={formData[name]}
@@ -217,7 +217,7 @@ export default function WorkShiftForm({
               <div className="grid grid-cols-3 gap-4">
                 {DAYS.map((day) => (
                   <div key={day.key} className="flex items-center">
-                    <input
+                    <input autoComplete="off"
                       id={`gwh_work_${day.key}`}
                       type="checkbox"
                       checked={formData[`gwh_work_${day.key}`] === "Y"}
@@ -239,7 +239,7 @@ export default function WorkShiftForm({
               <label htmlFor="gwh_remark" className={labelClass}>
                 Keterangan
               </label>
-              <input
+              <input autoComplete="off"
                 id="gwh_remark"
                 value={formData.gwh_remark}
                 onChange={(e) => field("gwh_remark", e.target.value)}

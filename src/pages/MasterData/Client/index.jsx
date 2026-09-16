@@ -3,6 +3,7 @@ import { useState } from "react";
 import Pagination from "../../../components/Pagination";
 import useLocalState from "../../../hooks/useLocalState";
 import useSession, {
+  can,
   inScope,
   isSuperuser,
   useEntities,
@@ -10,6 +11,8 @@ import useSession, {
 import ClientForm from "./form";
 
 const PER_PAGE = 10;
+// matches the menu path in constants/menus.json
+const PERM_PATH = "/master/client";
 
 // Clients come from this module — other modules read them instead of hardcoding options.
 export const useClients = () => {
@@ -29,7 +32,10 @@ const filterInputClass =
 export default function Client() {
   // No seeds — localStorage is the only source of data
   const [clients, setClients] = useLocalState("clients", []);
-  const [session] = useSession();
+    const [session] = useSession();
+    const canCreate = can(session, PERM_PATH, "create");
+    const canUpdate = can(session, PERM_PATH, "update");
+    const canDelete = can(session, PERM_PATH, "delete");
   const { entityNames } = useEntities();
   // Entity scope is only meaningful to a superuser or an account spanning several entities
   const canSeeEntities =
@@ -93,6 +99,7 @@ export default function Client() {
     <div className="min-h-screen mx-auto p-4">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold text-primary">Manajemen Klien</h1>
+        {canCreate && (
         <button
           type="button"
           onClick={() => {
@@ -104,6 +111,7 @@ export default function Client() {
           <Icon icon="fa6-solid:plus" className="mr-2 h-3 w-3" />
           Tambah Klien
         </button>
+        )}
       </div>
 
       {successMessage && (
@@ -121,7 +129,7 @@ export default function Client() {
       )}
 
       <div className="mb-4 flex flex-wrap justify-end gap-2">
-        <input
+        <input autoComplete="off"
           type="text"
           aria-label="Cari Nama atau Kode Klien"
           placeholder="Cari Nama/Kode Klien..."
@@ -181,6 +189,7 @@ export default function Client() {
                 </td>
                 <td className="px-6 py-3">
                   <div className="flex items-center justify-center gap-2">
+                    {canUpdate && (
                     <button
                       type="button"
                       data-tooltip="Edit"
@@ -193,6 +202,8 @@ export default function Client() {
                     >
                       <Icon icon="fa6-solid:pen-to-square" className="h-3 w-3" />
                     </button>
+                    )}
+                    {canDelete && (
                     <button
                       type="button"
                       data-tooltip="Hapus"
@@ -202,6 +213,7 @@ export default function Client() {
                     >
                       <Icon icon="fa6-solid:trash" className="h-3 w-3" />
                     </button>
+                    )}
                   </div>
                 </td>
               </tr>

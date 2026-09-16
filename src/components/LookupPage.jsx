@@ -4,6 +4,7 @@ import MultiSelect from "./MultiSelect";
 import Pagination from "./Pagination";
 import useLocalState from "../hooks/useLocalState";
 import useSession, {
+  can,
   inScope,
   isSuperuser,
   useEntities,
@@ -77,7 +78,7 @@ function LookupForm({ show, onClose, onSubmit, initialData, noun }) {
               >
                 Nama {noun}
               </label>
-              <input
+              <input autoComplete="off"
                 id="lookup-name"
                 value={formData.name}
                 onChange={(e) =>
@@ -128,10 +129,13 @@ function LookupForm({ show, onClose, onSubmit, initialData, noun }) {
   );
 }
 
-export default function LookupPage({ title, noun, storageKey }) {
+export default function LookupPage({ title, noun, storageKey, permPath }) {
   // No seeds — localStorage is the only source of data
   const [rows, setRows] = useLocalState(storageKey, []);
   const [session] = useSession();
+  const canCreate = can(session, permPath, "create");
+  const canUpdate = can(session, permPath, "update");
+  const canDelete = can(session, permPath, "delete");
   const { entityNames } = useEntities();
   // Entity scope is only meaningful to a superuser or an account spanning several entities
   const canSeeEntities =
@@ -188,17 +192,19 @@ export default function LookupPage({ title, noun, storageKey }) {
     <div className="min-h-screen mx-auto p-4">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold text-primary">{title}</h1>
-        <button
-          type="button"
-          onClick={() => {
-            setEditing(null);
-            setShowForm(true);
-          }}
-          className="flex items-center rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-700"
-        >
-          <Icon icon="fa6-solid:plus" className="mr-2 h-3 w-3" />
-          Tambah {noun}
-        </button>
+        {canCreate && (
+          <button
+            type="button"
+            onClick={() => {
+              setEditing(null);
+              setShowForm(true);
+            }}
+            className="flex items-center rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-700"
+          >
+            <Icon icon="fa6-solid:plus" className="mr-2 h-3 w-3" />
+            Tambah {noun}
+          </button>
+        )}
       </div>
 
       {successMessage && (
@@ -216,7 +222,7 @@ export default function LookupPage({ title, noun, storageKey }) {
       )}
 
       <div className="mb-4 flex justify-end">
-        <input
+        <input autoComplete="off"
           type="text"
           aria-label={`Cari ${noun}`}
           placeholder={`Cari ${noun.toLowerCase()}...`}
@@ -254,27 +260,31 @@ export default function LookupPage({ title, noun, storageKey }) {
                 )}
                 <td className="px-6 py-3">
                   <div className="flex items-center justify-center gap-2">
-                    <button
-                      type="button"
-                      data-tooltip="Edit"
-                      aria-label="Edit"
-                      onClick={() => {
-                        setEditing(row);
-                        setShowForm(true);
-                      }}
-                      className="rounded-lg bg-cyan-600 p-2 text-white hover:bg-cyan-700"
-                    >
-                      <Icon icon="fa6-solid:pen-to-square" className="h-3 w-3" />
-                    </button>
-                    <button
-                      type="button"
-                      data-tooltip="Hapus"
-                      aria-label="Hapus"
-                      onClick={() => setToDelete(row)}
-                      className="rounded-lg bg-red-600 p-2 text-white hover:bg-red-700"
-                    >
-                      <Icon icon="fa6-solid:trash" className="h-3 w-3" />
-                    </button>
+                    {canUpdate && (
+                      <button
+                        type="button"
+                        data-tooltip="Edit"
+                        aria-label="Edit"
+                        onClick={() => {
+                          setEditing(row);
+                          setShowForm(true);
+                        }}
+                        className="rounded-lg bg-cyan-600 p-2 text-white hover:bg-cyan-700"
+                      >
+                        <Icon icon="fa6-solid:pen-to-square" className="h-3 w-3" />
+                      </button>
+                    )}
+                    {canDelete && (
+                      <button
+                        type="button"
+                        data-tooltip="Hapus"
+                        aria-label="Hapus"
+                        onClick={() => setToDelete(row)}
+                        className="rounded-lg bg-red-600 p-2 text-white hover:bg-red-700"
+                      >
+                        <Icon icon="fa6-solid:trash" className="h-3 w-3" />
+                      </button>
+                    )}
                   </div>
                 </td>
               </tr>

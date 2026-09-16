@@ -116,7 +116,7 @@ export default function LocationForm({ show, onClose, onSubmit, initialData }) {
                 <label htmlFor="mlm_loc_type" className={labelClass}>
                   Jenis Lokasi
                 </label>
-                <select
+                <select autoComplete="off"
                   id="mlm_loc_type"
                   value={formData.mlm_loc_type}
                   onChange={(e) => field("mlm_loc_type", e.target.value)}
@@ -136,7 +136,7 @@ export default function LocationForm({ show, onClose, onSubmit, initialData }) {
                 <label htmlFor="mlm_customer" className={labelClass}>
                   Klien
                 </label>
-                <select
+                <select autoComplete="off"
                   id="mlm_customer"
                   value={formData.mlm_customer}
                   onChange={(e) => field("mlm_customer", e.target.value)}
@@ -172,7 +172,7 @@ export default function LocationForm({ show, onClose, onSubmit, initialData }) {
                 <label htmlFor="mlm_loc_name" className={labelClass}>
                   Nama Lokasi
                 </label>
-                <input
+                <input autoComplete="off"
                   id="mlm_loc_name"
                   value={formData.mlm_loc_name}
                   onChange={(e) => field("mlm_loc_name", e.target.value)}
@@ -185,7 +185,7 @@ export default function LocationForm({ show, onClose, onSubmit, initialData }) {
                 <label htmlFor="mlm_loc_short" className={labelClass}>
                   Singkatan Lokasi
                 </label>
-                <input
+                <input autoComplete="off"
                   id="mlm_loc_short"
                   value={formData.mlm_loc_short}
                   onChange={(e) => field("mlm_loc_short", e.target.value)}
@@ -201,7 +201,7 @@ export default function LocationForm({ show, onClose, onSubmit, initialData }) {
                 <label htmlFor="mlm_loc_lat" className={labelClass}>
                   Latitude
                 </label>
-                <input
+                <input autoComplete="off"
                   id="mlm_loc_lat"
                   value={formData.mlm_loc_lat}
                   onChange={(e) => field("mlm_loc_lat", e.target.value)}
@@ -215,7 +215,7 @@ export default function LocationForm({ show, onClose, onSubmit, initialData }) {
                 <label htmlFor="mlm_loc_lon" className={labelClass}>
                   Longitude
                 </label>
-                <input
+                <input autoComplete="off"
                   id="mlm_loc_lon"
                   value={formData.mlm_loc_lon}
                   onChange={(e) => field("mlm_loc_lon", e.target.value)}

@@ -4,6 +4,7 @@ import MultiSelect from "../../../components/MultiSelect";
 import Pagination from "../../../components/Pagination";
 import useLocalState from "../../../hooks/useLocalState";
 import useSession, {
+  can,
   inScope,
   isSuperuser,
   useEntities,
@@ -12,6 +13,8 @@ import { useClients } from "../Client";
 import WorkShiftForm from "./form";
 
 const PER_PAGE = 10;
+// matches the menu path in constants/menus.json
+const PERM_PATH = "/master/work-shift";
 
 // ponytail: mirrors the form's static options — both come from the API later
 const SHIFT_TYPES = [
@@ -41,7 +44,10 @@ const COLUMNS = [
 export default function WorkShift() {
   // No seeds — localStorage is the only source of data
   const [shifts, setShifts] = useLocalState("workShifts", []);
-  const [session] = useSession();
+    const [session] = useSession();
+    const canCreate = can(session, PERM_PATH, "create");
+    const canUpdate = can(session, PERM_PATH, "update");
+    const canDelete = can(session, PERM_PATH, "delete");
   const { entityNames } = useEntities();
   const clientOptions = useClients();
   // Entity scope is only meaningful to a superuser or an account spanning several entities
@@ -108,6 +114,7 @@ export default function WorkShift() {
     <div className="min-h-screen mx-auto p-4">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold text-primary">Manajemen Jam Kerja</h1>
+        {canCreate && (
         <button
           type="button"
           onClick={() => {
@@ -119,6 +126,7 @@ export default function WorkShift() {
           <Icon icon="fa6-solid:plus" className="mr-2 h-3 w-3" />
           Tambah Jam Kerja
         </button>
+        )}
       </div>
 
       {successMessage && (
@@ -157,7 +165,7 @@ export default function WorkShift() {
             >
               Tipe Jam Kerja
             </label>
-            <select
+            <select autoComplete="off"
               id="filter-type"
               value={filters.type}
               onChange={(e) => setFilter("type", e.target.value)}
@@ -179,7 +187,7 @@ export default function WorkShift() {
             >
               Nama Jam Kerja
             </label>
-            <input
+            <input autoComplete="off"
               id="filter-name"
               type="text"
               placeholder="Contoh: Shift 1"
@@ -250,6 +258,7 @@ export default function WorkShift() {
                 )}
                 <td className="px-6 py-3">
                   <div className="flex items-center justify-center gap-2">
+                    {canUpdate && (
                     <button
                       type="button"
                       data-tooltip="Edit"
@@ -262,6 +271,8 @@ export default function WorkShift() {
                     >
                       <Icon icon="fa6-solid:pen-to-square" className="h-3 w-3" />
                     </button>
+                    )}
+                    {canDelete && (
                     <button
                       type="button"
                       data-tooltip="Hapus"
@@ -271,6 +282,7 @@ export default function WorkShift() {
                     >
                       <Icon icon="fa6-solid:trash" className="h-3 w-3" />
                     </button>
+                    )}
                   </div>
                 </td>
               </tr>

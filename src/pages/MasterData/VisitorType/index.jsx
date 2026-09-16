@@ -9,6 +9,7 @@ export default function VisitorType() {
       title="Manajemen Jenis Tamu"
       noun="Jenis Tamu"
       storageKey="visitorTypes"
+      permPath="/master/guest-type"
     />
   );
 }

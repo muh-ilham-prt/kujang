@@ -9,9 +9,10 @@ const ATTENDANCE = {
   absent: { count: 0, percentage: "0" },
 };
 
+// ponytail: grayscale stands in for a real disabled state until the attendance API lands
 export default function EmployeeAttendanceToday() {
   return (
-    <div className="w-full bg-white rounded-xl py-6 shadow-lg flex flex-col gap-4">
+    <div className="w-full bg-white rounded-xl py-6 shadow-lg flex flex-col gap-4 opacity-60 grayscale pointer-events-none">
       <div className="flex items-center justify-between border-b border-b-slate-300 pb-4 px-6">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-purple-100 text-purple-700 rounded-full">
@@ -21,6 +22,10 @@ export default function EmployeeAttendanceToday() {
             Absensi Karyawan Hari Ini
           </h5>
         </div>
+        <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-500">
+          <Icon icon="fa6-solid:lock" className="h-3 w-3" />
+          Belum Aktif
+        </span>
       </div>
 
       <div className="px-6 py-2">

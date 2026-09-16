@@ -9,6 +9,7 @@ export default function ClientGroup() {
       title="Manajemen Grup Klien"
       noun="Grup Klien"
       storageKey="clientGroups"
+      permPath="/master/client-group"
     />
   );
 }

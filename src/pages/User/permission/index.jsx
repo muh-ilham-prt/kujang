@@ -34,7 +34,6 @@ export default function PermissionPage() {
   const [role, setRole] = useState(selectedRole?.name || roles[0]?.name || "");
   // All roles live under one key: { [roleName]: { [path]: { read, create, ... } } }
   const [stored, setStored] = useLocalState("permissions", {});
-  const [notice, setNotice] = useState(null);
 
   const permissions = stored[role] || createPermissions();
 
@@ -83,7 +82,8 @@ export default function PermissionPage() {
         item.name === role ? { ...item, permissions: granted } : item
       )
     );
-    setNotice(`Permission ${role} berhasil diperbarui`);
+    // Straight back to the role list — the save notice lives there
+    navigate("/user/role");
   };
 
   return (
@@ -105,7 +105,7 @@ export default function PermissionPage() {
             <label htmlFor="permission-role" className="text-sm font-medium text-slate-700">
               Role
             </label>
-            <select
+            <select autoComplete="off"
               id="permission-role"
               value={role}
               onChange={(e) => changeRole(e.target.value)}
@@ -119,13 +119,6 @@ export default function PermissionPage() {
         )}
       </div>
 
-      {notice && (
-        <div className="mb-4 flex items-center justify-between rounded-lg bg-green-50 px-4 py-3 text-sm text-green-800">
-          <span>{notice}</span>
-          <button type="button" onClick={() => setNotice(null)} aria-label="Tutup notifikasi">✕</button>
-        </div>
-      )}
-
       <div className="overflow-x-auto rounded-lg shadow">
         <table className="w-full text-left text-sm text-slate-700">
           <thead className="bg-slate-50 text-xs uppercase text-slate-700">
@@ -133,7 +126,7 @@ export default function PermissionPage() {
               <th className="w-16 px-6 py-3">No</th>
               <th className="min-w-56 px-6 py-3">
                 <label className="flex cursor-pointer items-center gap-2 normal-case">
-                  <input
+                  <input autoComplete="off"
                     type="checkbox"
                     checked={allChecked}
                     onChange={(e) => setAll(e.target.checked)}
@@ -146,7 +139,7 @@ export default function PermissionPage() {
                 <th key={action} className="min-w-24 px-4 py-3 text-center">
                   <label className="flex cursor-pointer flex-col items-center gap-1">
                     {action}
-                    <input
+                    <input autoComplete="off"
                       type="checkbox"
                       aria-label={`Pilih semua ${action}`}
                       checked={columnChecked(action)}
@@ -168,7 +161,7 @@ export default function PermissionPage() {
                 </td>
                 {ACTIONS.map((action) => (
                   <td key={action} className="px-4 py-3 text-center">
-                    <input
+                    <input autoComplete="off"
                       type="checkbox"
                       aria-label={`${item.label} ${action}`}
                       checked={permissions[item.path]?.[action] || false}

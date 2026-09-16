@@ -8,10 +8,10 @@ export default function Dashboard() {
   return (
     <div className="flex flex-col gap-4 p-4">
       {/* <TopCard countEmployee={0} /> */}
-      <EmployeeAttendanceToday />
-      <MapEmployee />
       <ChartEmployeePerCustomer />
+      <EmployeeAttendanceToday />
       <ChartAttendanceWeek />
+      <MapEmployee />
     </div>
   );
 }

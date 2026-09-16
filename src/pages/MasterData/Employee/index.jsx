@@ -4,6 +4,7 @@ import MultiSelect from "../../../components/MultiSelect";
 import Pagination from "../../../components/Pagination";
 import useLocalState from "../../../hooks/useLocalState";
 import useSession, {
+  can,
   inScope,
   isSuperuser,
   useEntities,
@@ -15,6 +16,8 @@ import EmployeeForm from "./form";
 import EmployeeImport from "./components/import";
 
 const PER_PAGE = 10;
+// matches the menu path in constants/menus.json
+const PERM_PATH = "/master/employee";
 
 const labelOf = (options, value) =>
   options.find((o) => o.value === String(value))?.label || "-";
@@ -44,7 +47,10 @@ const filterInputClass =
 export default function Employee() {
   // No seeds — localStorage is the only source of data
   const [employees, setEmployees] = useLocalState("employees", []);
-  const [session] = useSession();
+    const [session] = useSession();
+    const canCreate = can(session, PERM_PATH, "create");
+    const canUpdate = can(session, PERM_PATH, "update");
+    const canDelete = can(session, PERM_PATH, "delete");
   const { entityNames } = useEntities();
   const clientOptions = useClients();
   const levelOptions = useLevels();
@@ -207,6 +213,7 @@ export default function Employee() {
             <Icon icon="fa6-solid:file-import" className="mr-2 h-3 w-3" />
             Import
           </button>
+          {canCreate && (
           <button
             type="button"
             onClick={() => {
@@ -218,6 +225,7 @@ export default function Employee() {
             <Icon icon="fa6-solid:plus" className="mr-2 h-3 w-3" />
             Tambah Karyawan
           </button>
+          )}
         </div>
       </div>
 
@@ -236,7 +244,7 @@ export default function Employee() {
       )}
 
       <div className="mb-4 flex flex-wrap justify-end gap-2">
-        <input
+        <input autoComplete="off"
           type="text"
           aria-label="Cari Nama atau NIP"
           placeholder="Cari Nama atau NIP..."
@@ -347,6 +355,7 @@ export default function Employee() {
                     >
                       <Icon icon="fa6-solid:file-pdf" className="h-3 w-3" />
                     </button>
+                    {canUpdate && (
                     <button
                       type="button"
                       data-tooltip="Edit"
@@ -359,6 +368,8 @@ export default function Employee() {
                     >
                       <Icon icon="fa6-solid:pen-to-square" className="h-3 w-3" />
                     </button>
+                    )}
+                    {canDelete && (
                     <button
                       type="button"
                       data-tooltip="Hapus"
@@ -375,6 +386,7 @@ export default function Employee() {
                     >
                       <Icon icon="fa6-solid:trash" className="h-3 w-3" />
                     </button>
+                    )}
                   </div>
                 </td>
               </tr>

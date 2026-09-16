@@ -9,6 +9,7 @@ export default function LocationType() {
       title="Manajemen Jenis Lokasi"
       noun="Jenis Lokasi"
       storageKey="locationTypes"
+      permPath="/master/location-type"
     />
   );
 }

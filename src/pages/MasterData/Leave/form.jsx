@@ -74,7 +74,7 @@ export default function LeaveForm({ show, onClose, onSubmit, initialData }) {
                 <label htmlFor="hal_empy_nip" className={labelClass}>
                   Karyawan
                 </label>
-                <select
+                <select autoComplete="off"
                   id="hal_empy_nip"
                   value={formData.hal_empy_nip}
                   onChange={(e) => field("hal_empy_nip", e.target.value)}
@@ -94,7 +94,7 @@ export default function LeaveForm({ show, onClose, onSubmit, initialData }) {
                 <label htmlFor="hal_abs_type" className={labelClass}>
                   Jenis Cuti
                 </label>
-                <select
+                <select autoComplete="off"
                   id="hal_abs_type"
                   value={formData.hal_abs_type}
                   onChange={(e) => field("hal_abs_type", e.target.value)}
@@ -116,7 +116,7 @@ export default function LeaveForm({ show, onClose, onSubmit, initialData }) {
                 <label htmlFor="hal_request_datefr" className={labelClass}>
                   Tanggal Mulai
                 </label>
-                <input
+                <input autoComplete="off"
                   id="hal_request_datefr"
                   type="date"
                   value={formData.hal_request_datefr}
@@ -130,7 +130,7 @@ export default function LeaveForm({ show, onClose, onSubmit, initialData }) {
                 <label htmlFor="hal_request_dateto" className={labelClass}>
                   Tanggal Selesai
                 </label>
-                <input
+                <input autoComplete="off"
                   id="hal_request_dateto"
                   type="date"
                   value={formData.hal_request_dateto}
@@ -154,7 +154,7 @@ export default function LeaveForm({ show, onClose, onSubmit, initialData }) {
                 <label htmlFor="hal_request_sts" className={labelClass}>
                   Status
                 </label>
-                <select
+                <select autoComplete="off"
                   id="hal_request_sts"
                   value={formData.hal_request_sts}
                   onChange={(e) => field("hal_request_sts", e.target.value)}
@@ -174,7 +174,7 @@ export default function LeaveForm({ show, onClose, onSubmit, initialData }) {
               <label htmlFor="hal_request_desc" className={labelClass}>
                 Keterangan
               </label>
-              <textarea
+              <textarea autoComplete="off"
                 id="hal_request_desc"
                 value={formData.hal_request_desc}
                 onChange={(e) => field("hal_request_desc", e.target.value)}

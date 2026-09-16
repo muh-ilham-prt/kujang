@@ -5,12 +5,15 @@ import MultiSelect from "../../../components/MultiSelect";
 import Pagination from "../../../components/Pagination";
 import useLocalState from "../../../hooks/useLocalState";
 import useSession, {
+  can,
   inScope,
   isSuperuser,
   useEntities,
 } from "../../../hooks/useSession";
 
 const PER_PAGE = 10;
+// matches the menu path in constants/menus.json
+const PERM_PATH = "/user/role";
 
 // The built-in role: every menu, every action. Not editable, not deletable.
 export const SUPERUSER = "Superuser";
@@ -37,6 +40,9 @@ export default function Role() {
   const [notice, setNotice] = useState(null);
   const navigate = useNavigate();
   const [session] = useSession();
+  const canCreate = can(session, PERM_PATH, "create");
+  const canUpdate = can(session, PERM_PATH, "update");
+  const canDelete = can(session, PERM_PATH, "delete");
   const { entityOptions, entityNames } = useEntities();
   // Entity scope is only meaningful to a superuser or an account spanning several entities
   const canAssignEntities =
@@ -99,14 +105,16 @@ export default function Role() {
     <div className="mx-auto min-h-screen p-4">
       <div className="mb-4 flex items-center justify-between gap-2">
         <h1 className="text-2xl font-bold text-primary">Manajemen Role</h1>
-        <button
-          type="button"
-          onClick={() => setEditing({ name: "" })}
-          className="flex items-center rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-700"
-        >
-          <Icon icon="fa6-solid:plus" className="mr-2 h-3 w-3" />
-          Tambah Role
-        </button>
+        {canCreate && (
+          <button
+            type="button"
+            onClick={() => setEditing({ name: "" })}
+            className="flex items-center rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-700"
+          >
+            <Icon icon="fa6-solid:plus" className="mr-2 h-3 w-3" />
+            Tambah Role
+          </button>
+        )}
       </div>
 
       {notice && (
@@ -119,7 +127,7 @@ export default function Role() {
       )}
 
       <div className="mb-4 flex justify-end">
-        <input
+        <input autoComplete="off"
           type="text"
           aria-label="Cari Role"
           placeholder="Cari role..."
@@ -159,13 +167,15 @@ export default function Role() {
                   {role.locked ? (
                     <span className="text-xs text-slate-400">Akses penuh</span>
                   ) : (
-                    <button
-                      type="button"
-                      onClick={() => navigate("/user/permission", { state: { role } })}
-                      className="rounded-lg bg-cyan-600 px-3 py-2 text-xs font-medium text-white hover:bg-cyan-700"
-                    >
-                      Atur Permission
-                    </button>
+                    canUpdate && (
+                      <button
+                        type="button"
+                        onClick={() => navigate("/user/permission", { state: { role } })}
+                        className="rounded-lg bg-cyan-600 px-3 py-2 text-xs font-medium text-white hover:bg-cyan-700"
+                      >
+                        Atur Permission
+                      </button>
+                    )
                   )}
                 </td>
                 <td className="px-6 py-3">
@@ -178,24 +188,28 @@ export default function Role() {
                       <span className="text-xs text-slate-400">Role bawaan</span>
                     ) : (
                       <>
-                        <button
-                          type="button"
-                          data-tooltip="Edit"
-                          aria-label="Edit"
-                          onClick={() => setEditing(role)}
-                          className="rounded-lg bg-cyan-600 p-2 text-white hover:bg-cyan-700"
-                        >
-                          <Icon icon="fa6-solid:pen-to-square" className="h-3 w-3" />
-                        </button>
-                        <button
-                          type="button"
-                          data-tooltip="Hapus"
-                          aria-label="Hapus"
-                          onClick={() => setToDelete(role)}
-                          className="rounded-lg bg-red-600 p-2 text-white hover:bg-red-700"
-                        >
-                          <Icon icon="fa6-solid:trash" className="h-3 w-3" />
-                        </button>
+                        {canUpdate && (
+                          <button
+                            type="button"
+                            data-tooltip="Edit"
+                            aria-label="Edit"
+                            onClick={() => setEditing(role)}
+                            className="rounded-lg bg-cyan-600 p-2 text-white hover:bg-cyan-700"
+                          >
+                            <Icon icon="fa6-solid:pen-to-square" className="h-3 w-3" />
+                          </button>
+                        )}
+                        {canDelete && (
+                          <button
+                            type="button"
+                            data-tooltip="Hapus"
+                            aria-label="Hapus"
+                            onClick={() => setToDelete(role)}
+                            className="rounded-lg bg-red-600 p-2 text-white hover:bg-red-700"
+                          >
+                            <Icon icon="fa6-solid:trash" className="h-3 w-3" />
+                          </button>
+                        )}
                       </>
                     )}
                   </div>
@@ -219,7 +233,7 @@ export default function Role() {
             <label htmlFor="role-name" className="mb-1 block text-sm font-medium text-slate-700">
               Nama Role
             </label>
-            <input
+            <input autoComplete="off"
               id="role-name"
               value={editing.name}
               onChange={(e) => setEditing((prev) => ({ ...prev, name: e.target.value }))}
@@ -244,8 +258,8 @@ export default function Role() {
               </div>
             )}
             <div className="flex justify-end gap-2">
-              <button type="submit" className="rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white">Simpan</button>
               <button type="button" onClick={() => setEditing(null)} className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white">Batal</button>
+              <button type="submit" className="rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white">Simpan</button>
             </div>
           </form>
         </div>
