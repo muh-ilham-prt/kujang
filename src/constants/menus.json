@@ -1,0 +1,96 @@
+[
+  {
+    "label": "Dashboard",
+    "path": "/dashboard",
+    "icon": "fa6-solid:gauge-high"
+  },
+  {
+    "label": "Entity Manajemen",
+    "path": "/entity",
+    "icon": "fa6-solid:building"
+  },
+  {
+    "label": "User Manajemen",
+    "icon": "fa6-solid:users-gear",
+    "children": [
+      { "label": "Semua User", "path": "/user", "icon": "fa6-solid:users" },
+      {
+        "label": "Role",
+        "path": "/user/role",
+        "icon": "fa6-solid:user-shield"
+      }
+    ]
+  },
+  {
+    "label": "Master Data",
+    "icon": "fa6-solid:database",
+    "children": [
+      {
+        "label": "Jabatan",
+        "path": "/master/position",
+        "icon": "fa6-solid:briefcase"
+      },
+      {
+        "label": "Level",
+        "path": "/master/level",
+        "icon": "fa6-solid:layer-group"
+      },
+      {
+        "label": "Tipe Waktu Kerja",
+        "path": "/master/shift-type",
+        "icon": "fa6-solid:business-time"
+      },
+      {
+        "label": "Jam Kerja",
+        "path": "/master/work-shift",
+        "icon": "fa6-solid:clock"
+      },
+      {
+        "label": "Jenis Lokasi",
+        "path": "/master/location-type",
+        "icon": "fa6-solid:map-pin"
+      },
+      {
+        "label": "Lokasi",
+        "path": "/master/location",
+        "icon": "fa6-solid:location-dot"
+      },
+      {
+        "label": "Pegawai",
+        "path": "/master/employee",
+        "icon": "fa6-solid:id-badge"
+      },
+      {
+        "label": "Grup Klien",
+        "path": "/master/client-group",
+        "icon": "fa6-solid:sitemap"
+      },
+      {
+        "label": "Klien",
+        "path": "/master/client",
+        "icon": "fa6-solid:handshake"
+      },
+      {
+        "label": "Penerima Tamu",
+        "path": "/master/host",
+        "icon": "fa6-solid:user-tie"
+      },
+      {
+        "label": "Jenis Tamu",
+        "path": "/master/guest-type",
+        "icon": "fa6-solid:user-tag"
+      },
+      {
+        "label": "Tamu",
+        "path": "/master/guest",
+        "icon": "fa6-solid:user-check"
+      },
+      {
+        "label": "Cuti & Jenis Cuti",
+        "path": "/master/leave",
+        "icon": "fa6-solid:calendar-day"
+      }
+    ]
+  }
+]
+
