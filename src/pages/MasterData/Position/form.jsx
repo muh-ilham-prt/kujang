@@ -2,14 +2,30 @@ import { useEffect, useState } from "react";
 import MultiSelect from "../../../components/MultiSelect";
 import useSession, { isSuperuser, useEntities } from "../../../hooks/useSession";
 
+// Internal system key — derived from the name so the system can find a position
+// reliably without trusting hand-typed labels. Never rendered.
+export const slugify = (name) =>
+  String(name)
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
 const EMPTY = {
   mep_empy_position_name: "",
   mep_empy_position_short: "",
   entities: [],
 };
 
-export default function PositionForm({ show, onClose, onSubmit, initialData }) {
+export default function PositionForm({
+  show,
+  onClose,
+  onSubmit,
+  initialData,
+  positions = [],
+}) {
   const [formData, setFormData] = useState(EMPTY);
+  const [error, setError] = useState(null);
   const [session] = useSession();
   const { entityOptions } = useEntities();
   // Entity scope is only meaningful to a superuser or an account spanning several entities
@@ -18,21 +34,41 @@ export default function PositionForm({ show, onClose, onSubmit, initialData }) {
 
   useEffect(() => {
     setFormData(initialData ? { ...EMPTY, ...initialData } : EMPTY);
+    setError(null);
   }, [initialData, show]);
 
   if (!show) return null;
 
+  const field = (name, value) => setFormData({ ...formData, [name]: value });
+  const slug = slugify(formData.mep_empy_position_name);
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    // Slug is invisible, so surface the conflict in terms of the visible name.
+    // A slug may repeat across entities — only a clash inside the same entity is an error.
+    const mine = (formData.entities || []).map(String);
+    const sharesEntity = (p) =>
+      (p.entities || []).map(String).some((id) => mine.includes(id));
+    const duplicate = positions.some(
+      (p) =>
+        p.mep_empy_position_id !== initialData?.mep_empy_position_id &&
+        sharesEntity(p) &&
+        (p.mep_empy_position_slug || slugify(p.mep_empy_position_name)) === slug
+    );
+    if (duplicate) {
+      return setError("Nama jabatan sudah terdaftar di entity ini. Gunakan nama lain.");
+    }
     // Keep the existing scope untouched when the editor cannot change it
     onSubmit(
       canAssignEntities
-        ? formData
-        : { ...formData, entities: initialData?.entities || [] }
+        ? { ...formData, mep_empy_position_slug: slug }
+        : {
+            ...formData,
+            mep_empy_position_slug: slug,
+            entities: initialData?.entities || [],
+          }
     );
   };
-
-  const field = (name, value) => setFormData({ ...formData, [name]: value });
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
@@ -53,6 +89,12 @@ export default function PositionForm({ show, onClose, onSubmit, initialData }) {
 
         <form onSubmit={handleSubmit}>
           <div className="space-y-4 px-6 py-4">
+            {error && (
+              <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800">
+                {error}
+              </div>
+            )}
+
             {canAssignEntities && (
               <div>
                 <span className="mb-1 block text-sm font-medium text-slate-700">

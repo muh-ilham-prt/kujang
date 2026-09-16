@@ -3,6 +3,15 @@ import MultiSelect from "../../../components/MultiSelect";
 import useSession, { isSuperuser, useEntities } from "../../../hooks/useSession";
 import { useClients } from "../Client";
 
+// Internal system key for a host — derived from the name so the system can
+// find it reliably without trusting hand-typed labels. Never rendered.
+const slugify = (name) =>
+  String(name)
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
 const EMPTY = {
   mcr_customer: "",
   mcr_cust_name: "",
@@ -15,8 +24,15 @@ const inputClass =
   "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none";
 const labelClass = "mb-1 block text-sm font-medium text-slate-700";
 
-export default function HostForm({ show, onClose, onSubmit, initialData }) {
+export default function HostForm({
+  show,
+  onClose,
+  onSubmit,
+  initialData,
+  hosts = [],
+}) {
   const [formData, setFormData] = useState(EMPTY);
+  const [error, setError] = useState(null);
   const [session] = useSession();
   const { entityOptions } = useEntities();
   const clients = useClients();
@@ -26,6 +42,7 @@ export default function HostForm({ show, onClose, onSubmit, initialData }) {
 
   useEffect(() => {
     setFormData(initialData ? { ...EMPTY, ...initialData } : EMPTY);
+    setError(null);
   }, [initialData, show]);
 
   if (!show) return null;
@@ -34,11 +51,32 @@ export default function HostForm({ show, onClose, onSubmit, initialData }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    // Slug is invisible, so surface the conflict in terms of the visible name.
+    // A slug may repeat across entities — only a clash inside the same entity is an error.
+    const slug = slugify(formData.mcr_cust_name);
+    const mine = (formData.entities || []).map(String);
+    const sharesEntity = (h) =>
+      (h.entities || []).map(String).some((id) => mine.includes(id));
+    const duplicate = hosts.some(
+      (h) =>
+        h.mcr_resident_id !== initialData?.mcr_resident_id &&
+        sharesEntity(h) &&
+        (h.mcr_cust_slug || slugify(h.mcr_cust_name)) === slug
+    );
+    if (duplicate) {
+      return setError(
+        "Nama penerima tamu sudah terdaftar di entity ini. Gunakan nama lain."
+      );
+    }
     // Keep the existing scope untouched when the editor cannot change it
     onSubmit(
       canAssignEntities
-        ? formData
-        : { ...formData, entities: initialData?.entities || [] }
+        ? { ...formData, mcr_cust_slug: slug }
+        : {
+            ...formData,
+            mcr_cust_slug: slug,
+            entities: initialData?.entities || [],
+          }
     );
   };
 
@@ -61,6 +99,12 @@ export default function HostForm({ show, onClose, onSubmit, initialData }) {
 
         <form onSubmit={handleSubmit}>
           <div className="space-y-4 px-6 py-4">
+            {error && (
+              <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800">
+                {error}
+              </div>
+            )}
+
             {canAssignEntities && (
               <div>
                 <span className={labelClass}>Entity</span>

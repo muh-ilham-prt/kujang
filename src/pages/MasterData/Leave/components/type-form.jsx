@@ -6,6 +6,15 @@ import useSession, {
 } from "../../../../hooks/useSession";
 import { QUOTA_PERIODS, inputClass, labelClass } from "../constants";
 
+// Internal system key for a leave type — derived from the name so the system can
+// find it reliably without trusting hand-typed labels. Never rendered.
+const slugify = (name) =>
+  String(name)
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
 const EMPTY = {
   meat_abs_type_name: "",
   meat_abs_type_desc: "",
@@ -14,8 +23,15 @@ const EMPTY = {
   entities: [],
 };
 
-export default function LeaveTypeForm({ show, onClose, onSubmit, initialData }) {
+export default function LeaveTypeForm({
+  show,
+  onClose,
+  onSubmit,
+  initialData,
+  types = [],
+}) {
   const [formData, setFormData] = useState(EMPTY);
+  const [error, setError] = useState(null);
   const [session] = useSession();
   const { entityOptions } = useEntities();
   // Entity scope is only meaningful to a superuser or an account spanning several entities
@@ -24,6 +40,7 @@ export default function LeaveTypeForm({ show, onClose, onSubmit, initialData }) 
 
   useEffect(() => {
     setFormData(initialData ? { ...EMPTY, ...initialData } : EMPTY);
+    setError(null);
   }, [initialData, show]);
 
   if (!show) return null;
@@ -32,11 +49,32 @@ export default function LeaveTypeForm({ show, onClose, onSubmit, initialData }) 
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    // Slug is invisible, so surface the conflict in terms of the visible name.
+    // A slug may repeat across entities — only a clash inside the same entity is an error.
+    const slug = slugify(formData.meat_abs_type_name);
+    const mine = (formData.entities || []).map(String);
+    const sharesEntity = (t) =>
+      (t.entities || []).map(String).some((id) => mine.includes(id));
+    const duplicate = types.some(
+      (t) =>
+        t.meat_abs_type !== initialData?.meat_abs_type &&
+        sharesEntity(t) &&
+        (t.meat_abs_type_slug || slugify(t.meat_abs_type_name)) === slug
+    );
+    if (duplicate) {
+      return setError(
+        "Nama jenis cuti sudah terdaftar di entity ini. Gunakan nama lain."
+      );
+    }
     // Keep the existing scope untouched when the editor cannot change it
     onSubmit(
       canAssignEntities
-        ? formData
-        : { ...formData, entities: initialData?.entities || [] }
+        ? { ...formData, meat_abs_type_slug: slug }
+        : {
+            ...formData,
+            meat_abs_type_slug: slug,
+            entities: initialData?.entities || [],
+          }
     );
   };
 
@@ -59,6 +97,12 @@ export default function LeaveTypeForm({ show, onClose, onSubmit, initialData }) 
 
         <form onSubmit={handleSubmit}>
           <div className="space-y-4 px-6 py-4">
+            {error && (
+              <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800">
+                {error}
+              </div>
+            )}
+
             {canAssignEntities && (
               <div>
                 <span className={labelClass}>Entity</span>

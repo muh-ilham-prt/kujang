@@ -29,10 +29,10 @@ export const useLevels = () => {
 export default function Level() {
   // No seeds — localStorage is the only source of data
   const [levels, setLevels] = useLocalState("levels", []);
-    const [session] = useSession();
-    const canCreate = can(session, PERM_PATH, "create");
-    const canUpdate = can(session, PERM_PATH, "update");
-    const canDelete = can(session, PERM_PATH, "delete");
+  const [session] = useSession();
+  const canCreate = can(session, PERM_PATH, "create");
+  const canUpdate = can(session, PERM_PATH, "update");
+  const canDelete = can(session, PERM_PATH, "delete");
   const { entityNames } = useEntities();
   // Entity scope is only meaningful to a superuser or an account spanning several entities
   const canSeeEntities =
@@ -48,15 +48,17 @@ export default function Level() {
   const totalPages = Math.ceil(filtered.length / PER_PAGE);
   const pageItems = filtered.slice(
     (currentPage - 1) * PER_PAGE,
-    currentPage * PER_PAGE
+    currentPage * PER_PAGE,
   );
 
   const handleSubmit = (data) => {
     if (editing) {
       setLevels((prev) =>
         prev.map((l) =>
-          l.mel_empy_level_id === editing.mel_empy_level_id ? { ...l, ...data } : l
-        )
+          l.mel_empy_level_id === editing.mel_empy_level_id
+            ? { ...l, ...data }
+            : l,
+        ),
       );
       setSuccessMessage("Level berhasil diperbarui");
     } else {
@@ -78,7 +80,7 @@ export default function Level() {
 
   const handleDelete = () => {
     setLevels((prev) =>
-      prev.filter((l) => l.mel_empy_level_id !== toDelete.mel_empy_level_id)
+      prev.filter((l) => l.mel_empy_level_id !== toDelete.mel_empy_level_id),
     );
     setSuccessMessage("Level berhasil dihapus");
     setToDelete(null);
@@ -89,17 +91,17 @@ export default function Level() {
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold text-primary">Manajemen Level</h1>
         {canCreate && (
-        <button
-          type="button"
-          onClick={() => {
-            setEditing(null);
-            setShowForm(true);
-          }}
-          className="flex items-center rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-700"
-        >
-          <Icon icon="fa6-solid:plus" className="mr-2 h-3 w-3" />
-          Tambah Level
-        </button>
+          <button
+            type="button"
+            onClick={() => {
+              setEditing(null);
+              setShowForm(true);
+            }}
+            className="flex items-center rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-700"
+          >
+            <Icon icon="fa6-solid:plus" className="mr-2 h-3 w-3" />
+            Tambah Level
+          </button>
         )}
       </div>
 
@@ -122,9 +124,9 @@ export default function Level() {
           <thead className="bg-slate-50 text-xs uppercase text-slate-700">
             <tr>
               <th className="w-16 px-6 py-3">No</th>
+              {canSeeEntities && <th className="px-6 py-3">Entity</th>}
               <th className="px-6 py-3">Nama Level</th>
               <th className="px-6 py-3">Singkatan</th>
-              {canSeeEntities && <th className="px-6 py-3">Entity</th>}
               <th className="px-6 py-3 text-center">Aksi</th>
             </tr>
           </thead>
@@ -137,36 +139,39 @@ export default function Level() {
                 <td className="px-6 py-3">
                   {(currentPage - 1) * PER_PAGE + index + 1}
                 </td>
-                <td className="px-6 py-3">{level.mel_empy_level_name}</td>
-                <td className="px-6 py-3">{level.mel_empy_level_short}</td>
                 {canSeeEntities && (
                   <td className="px-6 py-3">{entityNames(level.entities)}</td>
                 )}
+                <td className="px-6 py-3">{level.mel_empy_level_name}</td>
+                <td className="px-6 py-3">{level.mel_empy_level_short}</td>
                 <td className="flex items-center justify-center gap-2 px-6 py-3">
                   {canUpdate && (
-                  <button
-                    type="button"
-                    data-tooltip="Edit"
-                    aria-label="Edit"
-                    onClick={() => {
-                      setEditing(level);
-                      setShowForm(true);
-                    }}
-                    className="rounded-lg bg-cyan-600 p-2 text-white hover:bg-cyan-700"
-                  >
-                    <Icon icon="fa6-solid:pen-to-square" className="h-3 w-3" />
-                  </button>
+                    <button
+                      type="button"
+                      data-tooltip="Edit"
+                      aria-label="Edit"
+                      onClick={() => {
+                        setEditing(level);
+                        setShowForm(true);
+                      }}
+                      className="rounded-lg bg-cyan-600 p-2 text-white hover:bg-cyan-700"
+                    >
+                      <Icon
+                        icon="fa6-solid:pen-to-square"
+                        className="h-3 w-3"
+                      />
+                    </button>
                   )}
                   {canDelete && (
-                  <button
-                    type="button"
-                    data-tooltip="Hapus"
-                    aria-label="Hapus"
-                    onClick={() => setToDelete(level)}
-                    className="rounded-lg bg-red-600 p-2 text-white hover:bg-red-700"
-                  >
-                    <Icon icon="fa6-solid:trash" className="h-3 w-3" />
-                  </button>
+                    <button
+                      type="button"
+                      data-tooltip="Hapus"
+                      aria-label="Hapus"
+                      onClick={() => setToDelete(level)}
+                      className="rounded-lg bg-red-600 p-2 text-white hover:bg-red-700"
+                    >
+                      <Icon icon="fa6-solid:trash" className="h-3 w-3" />
+                    </button>
                   )}
                 </td>
               </tr>
@@ -198,6 +203,7 @@ export default function Level() {
         onClose={() => setShowForm(false)}
         onSubmit={handleSubmit}
         initialData={editing}
+        levels={levels}
       />
 
       {toDelete && (
@@ -233,3 +239,4 @@ export default function Level() {
     </div>
   );
 }
+

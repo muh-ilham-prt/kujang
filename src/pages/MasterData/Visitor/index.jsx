@@ -22,7 +22,11 @@ const CLASS_BADGE = {
 
 // Identity numbers are sensitive — show only the last 4 digits.
 const maskNik = (nik) =>
-  !nik ? "-" : nik.length <= 4 ? nik : "*".repeat(nik.length - 4) + nik.slice(-4);
+  !nik
+    ? "-"
+    : nik.length <= 4
+      ? nik
+      : "*".repeat(nik.length - 4) + nik.slice(-4);
 
 const filterInputClass =
   "rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 focus:outline-none";
@@ -48,12 +52,12 @@ export default function Visitor() {
   const filtered = visitors.filter(
     (v) =>
       inScope(session, v) &&
-      (!query || v.mv_vist_name.toLowerCase().includes(query))
+      (!query || v.mv_vist_name.toLowerCase().includes(query)),
   );
   const totalPages = Math.ceil(filtered.length / PER_PAGE);
   const pageItems = filtered.slice(
     (currentPage - 1) * PER_PAGE,
-    currentPage * PER_PAGE
+    currentPage * PER_PAGE,
   );
 
   const handleStatusSubmit = (status) => {
@@ -61,8 +65,8 @@ export default function Visitor() {
       prev.map((v) =>
         v.mv_vist_id === editingStatus.mv_vist_id
           ? { ...v, mv_vist_status: status }
-          : v
-      )
+          : v,
+      ),
     );
     setSuccessMessage("Status tamu berhasil diubah");
     setEditingStatus(null);
@@ -70,7 +74,7 @@ export default function Visitor() {
 
   const handleDelete = () => {
     setVisitors((prev) =>
-      prev.filter((v) => v.mv_vist_id !== toDelete.mv_vist_id)
+      prev.filter((v) => v.mv_vist_id !== toDelete.mv_vist_id),
     );
     setSuccessMessage("Data tamu berhasil dihapus");
     setToDelete(null);
@@ -97,7 +101,8 @@ export default function Visitor() {
       )}
 
       <div className="mb-4 flex flex-wrap justify-end gap-2">
-        <input autoComplete="off"
+        <input
+          autoComplete="off"
           type="text"
           aria-label="Cari Nama Tamu"
           placeholder="Cari dengan nama..."
@@ -115,12 +120,12 @@ export default function Visitor() {
           <thead className="bg-slate-50 text-xs uppercase text-slate-700">
             <tr>
               <th className="w-16 px-6 py-3">No</th>
+              {canSeeEntities && <th className="px-6 py-3">Entity</th>}
               <th className="px-6 py-3">Nama</th>
               <th className="px-6 py-3">Jenis Tamu</th>
               <th className="px-6 py-3">No. Identitas</th>
               <th className="px-6 py-3">Kendaraan</th>
               <th className="px-6 py-3">Perusahaan</th>
-              {canSeeEntities && <th className="px-6 py-3">Entity</th>}
               <th className="px-6 py-3">Status</th>
               <th className="px-6 py-3 text-center">Aksi</th>
             </tr>
@@ -129,7 +134,10 @@ export default function Visitor() {
             {pageItems.map((visitor, index) => {
               const [classLabel, classColor] = CLASS_BADGE[
                 visitor.mv_vist_class
-              ] || [visitor.mv_vist_class || "-", "bg-slate-100 text-slate-800"];
+              ] || [
+                visitor.mv_vist_class || "-",
+                "bg-slate-100 text-slate-800",
+              ];
               return (
                 <tr
                   key={visitor.mv_vist_id}
@@ -138,6 +146,11 @@ export default function Visitor() {
                   <td className="px-6 py-3">
                     {(currentPage - 1) * PER_PAGE + index + 1}
                   </td>
+                  {canSeeEntities && (
+                    <td className="px-6 py-3">
+                      {entityNames(visitor.entities)}
+                    </td>
+                  )}
                   <td className="px-6 py-3">{visitor.mv_vist_name}</td>
                   <td className="px-6 py-3">
                     <span
@@ -153,10 +166,9 @@ export default function Visitor() {
                       ? visitor.mv_visit_vehicle || "-"
                       : "-"}
                   </td>
-                  <td className="px-6 py-3">{visitor.mv_vist_company || "-"}</td>
-                  {canSeeEntities && (
-                    <td className="px-6 py-3">{entityNames(visitor.entities)}</td>
-                  )}
+                  <td className="px-6 py-3">
+                    {visitor.mv_vist_company || "-"}
+                  </td>
                   <td className="px-6 py-3">
                     <span
                       className={`rounded-full px-2 py-1 text-xs font-medium ${
@@ -171,29 +183,29 @@ export default function Visitor() {
                   <td className="px-6 py-3">
                     <div className="flex items-center justify-center gap-2">
                       {canUpdate && (
-                      <button
-                        type="button"
-                        data-tooltip="Ubah Status"
-                        aria-label="Ubah Status"
-                        onClick={() => setEditingStatus(visitor)}
-                        className="rounded-lg bg-cyan-600 p-2 text-white hover:bg-cyan-700"
-                      >
-                        <Icon
-                          icon="fa6-solid:pen-to-square"
-                          className="h-3 w-3"
-                        />
-                      </button>
+                        <button
+                          type="button"
+                          data-tooltip="Ubah Status"
+                          aria-label="Ubah Status"
+                          onClick={() => setEditingStatus(visitor)}
+                          className="rounded-lg bg-cyan-600 p-2 text-white hover:bg-cyan-700"
+                        >
+                          <Icon
+                            icon="fa6-solid:pen-to-square"
+                            className="h-3 w-3"
+                          />
+                        </button>
                       )}
                       {canDelete && (
-                      <button
-                        type="button"
-                        data-tooltip="Hapus"
-                        aria-label="Hapus"
-                        onClick={() => setToDelete(visitor)}
-                        className="rounded-lg bg-red-600 p-2 text-white hover:bg-red-700"
-                      >
-                        <Icon icon="fa6-solid:trash" className="h-3 w-3" />
-                      </button>
+                        <button
+                          type="button"
+                          data-tooltip="Hapus"
+                          aria-label="Hapus"
+                          onClick={() => setToDelete(visitor)}
+                          className="rounded-lg bg-red-600 p-2 text-white hover:bg-red-700"
+                        >
+                          <Icon icon="fa6-solid:trash" className="h-3 w-3" />
+                        </button>
                       )}
                     </div>
                   </td>
@@ -264,3 +276,4 @@ export default function Visitor() {
     </div>
   );
 }
+

@@ -32,10 +32,10 @@ const filterInputClass =
 export default function Client() {
   // No seeds — localStorage is the only source of data
   const [clients, setClients] = useLocalState("clients", []);
-    const [session] = useSession();
-    const canCreate = can(session, PERM_PATH, "create");
-    const canUpdate = can(session, PERM_PATH, "update");
-    const canDelete = can(session, PERM_PATH, "delete");
+  const [session] = useSession();
+  const canCreate = can(session, PERM_PATH, "create");
+  const canUpdate = can(session, PERM_PATH, "update");
+  const canDelete = can(session, PERM_PATH, "delete");
   const { entityNames } = useEntities();
   // Entity scope is only meaningful to a superuser or an account spanning several entities
   const canSeeEntities =
@@ -54,20 +54,20 @@ export default function Client() {
       inScope(session, c) &&
       (!query ||
         c.mcm_cust_name.toLowerCase().includes(query) ||
-        c.mcm_cust_short.toLowerCase().includes(query))
+        c.mcm_cust_short.toLowerCase().includes(query)),
   );
   const totalPages = Math.ceil(filtered.length / PER_PAGE);
   const pageItems = filtered.slice(
     (currentPage - 1) * PER_PAGE,
-    currentPage * PER_PAGE
+    currentPage * PER_PAGE,
   );
 
   const handleSubmit = (data) => {
     if (editing) {
       setClients((prev) =>
         prev.map((c) =>
-          c.mcm_cust_id === editing.mcm_cust_id ? { ...c, ...data } : c
-        )
+          c.mcm_cust_id === editing.mcm_cust_id ? { ...c, ...data } : c,
+        ),
       );
       setSuccessMessage("Klien berhasil diperbarui");
     } else {
@@ -89,7 +89,7 @@ export default function Client() {
 
   const handleDelete = () => {
     setClients((prev) =>
-      prev.filter((c) => c.mcm_cust_id !== toDelete.mcm_cust_id)
+      prev.filter((c) => c.mcm_cust_id !== toDelete.mcm_cust_id),
     );
     setSuccessMessage("Klien berhasil dihapus");
     setToDelete(null);
@@ -100,17 +100,17 @@ export default function Client() {
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold text-primary">Manajemen Klien</h1>
         {canCreate && (
-        <button
-          type="button"
-          onClick={() => {
-            setEditing(null);
-            setShowForm(true);
-          }}
-          className="flex items-center rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-700"
-        >
-          <Icon icon="fa6-solid:plus" className="mr-2 h-3 w-3" />
-          Tambah Klien
-        </button>
+          <button
+            type="button"
+            onClick={() => {
+              setEditing(null);
+              setShowForm(true);
+            }}
+            className="flex items-center rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-700"
+          >
+            <Icon icon="fa6-solid:plus" className="mr-2 h-3 w-3" />
+            Tambah Klien
+          </button>
         )}
       </div>
 
@@ -129,7 +129,8 @@ export default function Client() {
       )}
 
       <div className="mb-4 flex flex-wrap justify-end gap-2">
-        <input autoComplete="off"
+        <input
+          autoComplete="off"
           type="text"
           aria-label="Cari Nama atau Kode Klien"
           placeholder="Cari Nama/Kode Klien..."
@@ -147,9 +148,9 @@ export default function Client() {
           <thead className="bg-slate-50 text-xs uppercase text-slate-700">
             <tr>
               <th className="w-16 px-6 py-3">No</th>
+              {canSeeEntities && <th className="px-6 py-3">Entity</th>}
               <th className="px-6 py-3">Kode</th>
               <th className="px-6 py-3">Nama Klien</th>
-              {canSeeEntities && <th className="px-6 py-3">Entity</th>}
               <th className="px-6 py-3">Alamat</th>
               <th className="px-6 py-3">Telepon</th>
               <th className="px-6 py-3">Radius</th>
@@ -166,11 +167,11 @@ export default function Client() {
                 <td className="px-6 py-3">
                   {(currentPage - 1) * PER_PAGE + index + 1}
                 </td>
-                <td className="px-6 py-3">{client.mcm_cust_short}</td>
-                <td className="px-6 py-3">{client.mcm_cust_name}</td>
                 {canSeeEntities && (
                   <td className="px-6 py-3">{entityNames(client.entities)}</td>
                 )}
+                <td className="px-6 py-3">{client.mcm_cust_short}</td>
+                <td className="px-6 py-3">{client.mcm_cust_name}</td>
                 <td className="px-6 py-3">{client.mcm_address}</td>
                 <td className="px-6 py-3">{client.mcm_phone || "-"}</td>
                 <td className="px-6 py-3">
@@ -190,29 +191,32 @@ export default function Client() {
                 <td className="px-6 py-3">
                   <div className="flex items-center justify-center gap-2">
                     {canUpdate && (
-                    <button
-                      type="button"
-                      data-tooltip="Edit"
-                      aria-label="Edit"
-                      onClick={() => {
-                        setEditing(client);
-                        setShowForm(true);
-                      }}
-                      className="rounded-lg bg-cyan-600 p-2 text-white hover:bg-cyan-700"
-                    >
-                      <Icon icon="fa6-solid:pen-to-square" className="h-3 w-3" />
-                    </button>
+                      <button
+                        type="button"
+                        data-tooltip="Edit"
+                        aria-label="Edit"
+                        onClick={() => {
+                          setEditing(client);
+                          setShowForm(true);
+                        }}
+                        className="rounded-lg bg-cyan-600 p-2 text-white hover:bg-cyan-700"
+                      >
+                        <Icon
+                          icon="fa6-solid:pen-to-square"
+                          className="h-3 w-3"
+                        />
+                      </button>
                     )}
                     {canDelete && (
-                    <button
-                      type="button"
-                      data-tooltip="Hapus"
-                      aria-label="Hapus"
-                      onClick={() => setToDelete(client)}
-                      className="rounded-lg bg-red-600 p-2 text-white hover:bg-red-700"
-                    >
-                      <Icon icon="fa6-solid:trash" className="h-3 w-3" />
-                    </button>
+                      <button
+                        type="button"
+                        data-tooltip="Hapus"
+                        aria-label="Hapus"
+                        onClick={() => setToDelete(client)}
+                        className="rounded-lg bg-red-600 p-2 text-white hover:bg-red-700"
+                      >
+                        <Icon icon="fa6-solid:trash" className="h-3 w-3" />
+                      </button>
                     )}
                   </div>
                 </td>
@@ -247,6 +251,7 @@ export default function Client() {
         onClose={() => setShowForm(false)}
         onSubmit={handleSubmit}
         initialData={editing}
+        clients={clients}
       />
 
       {toDelete && (
@@ -283,3 +288,4 @@ export default function Client() {
     </div>
   );
 }
+

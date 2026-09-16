@@ -31,10 +31,10 @@ export default function Leave() {
   const [tab, setTab] = useState("leave");
   // No seeds — localStorage is the only source of data
   const [leaves, setLeaves] = useLocalState("leaves", []);
-    const [session] = useSession();
-    const canCreate = can(session, PERM_PATH, "create");
-    const canUpdate = can(session, PERM_PATH, "update");
-    const canDelete = can(session, PERM_PATH, "delete");
+  const [session] = useSession();
+  const canCreate = can(session, PERM_PATH, "create");
+  const canUpdate = can(session, PERM_PATH, "update");
+  const canDelete = can(session, PERM_PATH, "delete");
   const { entityNames } = useEntities();
   const employeeOptions = useEmployees();
   const leaveTypeOptions = useLeaveTypes();
@@ -58,12 +58,12 @@ export default function Leave() {
         labelOf(employeeOptions, l.hal_empy_nip)
           .toLowerCase()
           .includes(search) ||
-        String(l.hal_empy_nip).includes(search))
+        String(l.hal_empy_nip).includes(search)),
   );
   const totalPages = Math.ceil(filtered.length / PER_PAGE);
   const pageItems = filtered.slice(
     (currentPage - 1) * PER_PAGE,
-    currentPage * PER_PAGE
+    currentPage * PER_PAGE,
   );
 
   const setFilter = (key, value) => {
@@ -75,8 +75,8 @@ export default function Leave() {
     if (editing) {
       setLeaves((prev) =>
         prev.map((l) =>
-          l.hal_leave_id === editing.hal_leave_id ? { ...l, ...data } : l
-        )
+          l.hal_leave_id === editing.hal_leave_id ? { ...l, ...data } : l,
+        ),
       );
       setSuccessMessage("Pengajuan cuti berhasil diperbarui");
     } else {
@@ -100,7 +100,7 @@ export default function Leave() {
 
   const handleDelete = () => {
     setLeaves((prev) =>
-      prev.filter((l) => l.hal_leave_id !== toDelete.hal_leave_id)
+      prev.filter((l) => l.hal_leave_id !== toDelete.hal_leave_id),
     );
     setSuccessMessage("Pengajuan cuti berhasil dihapus");
     setToDelete(null);
@@ -156,20 +156,21 @@ export default function Leave() {
         <>
           <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
             {canCreate && (
-            <button
-              type="button"
-              onClick={() => {
-                setEditing(null);
-                setShowForm(true);
-              }}
-              className="flex items-center rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-700"
-            >
-              <Icon icon="fa6-solid:plus" className="mr-2 h-3 w-3" />
-              Tambah Pengajuan Cuti
-            </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setEditing(null);
+                  setShowForm(true);
+                }}
+                className="flex items-center rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-700"
+              >
+                <Icon icon="fa6-solid:plus" className="mr-2 h-3 w-3" />
+                Tambah Pengajuan Cuti
+              </button>
             )}
             <div className="flex flex-wrap gap-2">
-              <input autoComplete="off"
+              <input
+                autoComplete="off"
                 type="text"
                 aria-label="Cari Karyawan"
                 placeholder="Cari nama atau NIP..."
@@ -177,7 +178,8 @@ export default function Leave() {
                 onChange={(e) => setFilter("search", e.target.value)}
                 className={filterInputClass}
               />
-              <select autoComplete="off"
+              <select
+                autoComplete="off"
                 aria-label="Filter Status"
                 value={filters.status}
                 onChange={(e) => setFilter("status", e.target.value)}
@@ -198,10 +200,10 @@ export default function Leave() {
               <thead className="bg-slate-50 text-xs uppercase text-slate-700">
                 <tr>
                   <th className="w-16 px-6 py-3">No</th>
+                  {canSeeEntities && <th className="px-6 py-3">Entity</th>}
                   <th className="px-6 py-3">NIP</th>
                   <th className="px-6 py-3">Nama</th>
                   <th className="px-6 py-3">Penempatan</th>
-                  {canSeeEntities && <th className="px-6 py-3">Entity</th>}
                   <th className="px-6 py-3">Jenis Cuti</th>
                   <th className="px-6 py-3">Tanggal Mulai</th>
                   <th className="px-6 py-3">Tanggal Selesai</th>
@@ -213,8 +215,14 @@ export default function Leave() {
               </thead>
               <tbody>
                 {pageItems.map((leave, index) => {
-                  const employee = optionOf(employeeOptions, leave.hal_empy_nip);
-                  const status = optionOf(LEAVE_STATUSES, leave.hal_request_sts);
+                  const employee = optionOf(
+                    employeeOptions,
+                    leave.hal_empy_nip,
+                  );
+                  const status = optionOf(
+                    LEAVE_STATUSES,
+                    leave.hal_request_sts,
+                  );
                   return (
                     <tr
                       key={leave.hal_leave_id}
@@ -223,14 +231,14 @@ export default function Leave() {
                       <td className="px-6 py-3">
                         {(currentPage - 1) * PER_PAGE + index + 1}
                       </td>
-                      <td className="px-6 py-3">{leave.hal_empy_nip}</td>
-                      <td className="px-6 py-3">{employee?.label || "-"}</td>
-                      <td className="px-6 py-3">{employee?.client || "-"}</td>
                       {canSeeEntities && (
                         <td className="px-6 py-3">
                           {entityNames(leave.entities)}
                         </td>
                       )}
+                      <td className="px-6 py-3">{leave.hal_empy_nip}</td>
+                      <td className="px-6 py-3">{employee?.label || "-"}</td>
+                      <td className="px-6 py-3">{employee?.client || "-"}</td>
                       <td className="px-6 py-3">
                         {labelOf(leaveTypeOptions, leave.hal_abs_type)}
                       </td>
@@ -240,7 +248,9 @@ export default function Leave() {
                       <td className="px-6 py-3">
                         {formatDate(leave.hal_request_dateto)}
                       </td>
-                      <td className="px-6 py-3">{leave.hal_request_days} hari</td>
+                      <td className="px-6 py-3">
+                        {leave.hal_request_days} hari
+                      </td>
                       <td className="px-6 py-3">
                         {leave.hal_request_desc || "-"}
                       </td>
@@ -256,32 +266,35 @@ export default function Leave() {
                       <td className="px-6 py-3">
                         <div className="flex items-center justify-center gap-2">
                           {canUpdate && (
-                          <button
-                            type="button"
-                            data-tooltip="Edit"
-                            aria-label="Edit"
-                            onClick={() => {
-                              setEditing(leave);
-                              setShowForm(true);
-                            }}
-                            className="rounded-lg bg-cyan-600 p-2 text-white hover:bg-cyan-700"
-                          >
-                            <Icon
-                              icon="fa6-solid:pen-to-square"
-                              className="h-3 w-3"
-                            />
-                          </button>
+                            <button
+                              type="button"
+                              data-tooltip="Edit"
+                              aria-label="Edit"
+                              onClick={() => {
+                                setEditing(leave);
+                                setShowForm(true);
+                              }}
+                              className="rounded-lg bg-cyan-600 p-2 text-white hover:bg-cyan-700"
+                            >
+                              <Icon
+                                icon="fa6-solid:pen-to-square"
+                                className="h-3 w-3"
+                              />
+                            </button>
                           )}
                           {canDelete && (
-                          <button
-                            type="button"
-                            data-tooltip="Hapus"
-                            aria-label="Hapus"
-                            onClick={() => setToDelete(leave)}
-                            className="rounded-lg bg-red-600 p-2 text-white hover:bg-red-700"
-                          >
-                            <Icon icon="fa6-solid:trash" className="h-3 w-3" />
-                          </button>
+                            <button
+                              type="button"
+                              data-tooltip="Hapus"
+                              aria-label="Hapus"
+                              onClick={() => setToDelete(leave)}
+                              className="rounded-lg bg-red-600 p-2 text-white hover:bg-red-700"
+                            >
+                              <Icon
+                                icon="fa6-solid:trash"
+                                className="h-3 w-3"
+                              />
+                            </button>
                           )}
                         </div>
                       </td>
@@ -317,6 +330,7 @@ export default function Leave() {
             onClose={() => setShowForm(false)}
             onSubmit={handleSubmit}
             initialData={editing}
+            leaves={leaves}
           />
 
           {toDelete && (
@@ -358,3 +372,4 @@ export default function Leave() {
     </div>
   );
 }
+

@@ -15,6 +15,15 @@ import useSession, {
 
 const PER_PAGE = 10;
 
+// Internal system key for a lookup — derived from the name so the system can
+// find it reliably without trusting hand-typed labels. Never rendered.
+export const slugify = (name) =>
+  String(name)
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
 // Options hook for a lookup, entity-scoped like every other cross-module hook.
 export const makeLookupHook = (storageKey) => () => {
   const [rows] = useLocalState(storageKey, []);
@@ -24,8 +33,9 @@ export const makeLookupHook = (storageKey) => () => {
     .map((row) => ({ value: String(row.id), label: row.name }));
 };
 
-function LookupForm({ show, onClose, onSubmit, initialData, noun }) {
+function LookupForm({ show, onClose, onSubmit, initialData, noun, rows = [] }) {
   const [formData, setFormData] = useState({ name: "", entities: [] });
+  const [error, setError] = useState(null);
   const [session] = useSession();
   const { entityOptions } = useEntities();
   // Entity scope is only meaningful to a superuser or an account spanning several entities
@@ -36,19 +46,38 @@ function LookupForm({ show, onClose, onSubmit, initialData, noun }) {
     setFormData(
       initialData
         ? { name: "", entities: [], ...initialData }
-        : { name: "", entities: [] }
+        : { name: "", entities: [] },
     );
+    setError(null);
   }, [initialData, show]);
 
   if (!show) return null;
 
+  const slug = slugify(formData.name);
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    // Slug is invisible, so surface the conflict in terms of the visible name.
+    // A slug may repeat across entities — only a clash inside the same entity is an error.
+    const mine = (formData.entities || []).map(String);
+    const sharesEntity = (row) =>
+      (row.entities || []).map(String).some((id) => mine.includes(id));
+    const duplicate = rows.some(
+      (row) =>
+        row.id !== initialData?.id &&
+        sharesEntity(row) &&
+        (row.slug || slugify(row.name)) === slug,
+    );
+    if (duplicate) {
+      return setError(
+        `Nama ${noun.toLowerCase()} sudah terdaftar di entity ini. Gunakan nama lain.`,
+      );
+    }
     // Keep the existing scope untouched when the editor cannot change it
     onSubmit(
       canAssignEntities
-        ? formData
-        : { ...formData, entities: initialData?.entities || [] }
+        ? { ...formData, slug }
+        : { ...formData, slug, entities: initialData?.entities || [] },
     );
   };
 
@@ -71,6 +100,12 @@ function LookupForm({ show, onClose, onSubmit, initialData, noun }) {
 
         <form onSubmit={handleSubmit}>
           <div className="space-y-4 px-6 py-4">
+            {error && (
+              <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800">
+                {error}
+              </div>
+            )}
+
             {canAssignEntities && (
               <div>
                 <span className="mb-1 block text-sm font-medium text-slate-700">
@@ -95,7 +130,8 @@ function LookupForm({ show, onClose, onSubmit, initialData, noun }) {
               >
                 Nama {noun}
               </label>
-              <input autoComplete="off"
+              <input
+                autoComplete="off"
                 id="lookup-name"
                 value={formData.name}
                 onChange={(e) =>
@@ -151,18 +187,19 @@ export default function LookupPage({ title, noun, storageKey, permPath }) {
   const query = search.toLowerCase();
   const filtered = rows.filter(
     (row) =>
-      inScope(session, row) && (!query || row.name.toLowerCase().includes(query))
+      inScope(session, row) &&
+      (!query || row.name.toLowerCase().includes(query)),
   );
   const totalPages = Math.ceil(filtered.length / PER_PAGE);
   const pageItems = filtered.slice(
     (currentPage - 1) * PER_PAGE,
-    currentPage * PER_PAGE
+    currentPage * PER_PAGE,
   );
 
   const handleSubmit = (data) => {
     if (editing) {
       setRows((prev) =>
-        prev.map((r) => (r.id === editing.id ? { ...r, ...data } : r))
+        prev.map((r) => (r.id === editing.id ? { ...r, ...data } : r)),
       );
       setSuccessMessage(`${noun} berhasil diperbarui`);
     } else {
@@ -222,7 +259,8 @@ export default function LookupPage({ title, noun, storageKey, permPath }) {
       )}
 
       <div className="mb-4 flex justify-end">
-        <input autoComplete="off"
+        <input
+          autoComplete="off"
           type="text"
           aria-label={`Cari ${noun}`}
           placeholder={`Cari ${noun.toLowerCase()}...`}
@@ -240,8 +278,8 @@ export default function LookupPage({ title, noun, storageKey, permPath }) {
           <thead className="bg-slate-50 text-xs uppercase text-slate-700">
             <tr>
               <th className="w-16 px-6 py-3">No</th>
-              <th className="px-6 py-3">Nama {noun}</th>
               {canSeeEntities && <th className="px-6 py-3">Entity</th>}
+              <th className="px-6 py-3">Nama {noun}</th>
               <th className="px-6 py-3 text-center">Aksi</th>
             </tr>
           </thead>
@@ -254,10 +292,10 @@ export default function LookupPage({ title, noun, storageKey, permPath }) {
                 <td className="px-6 py-3">
                   {(currentPage - 1) * PER_PAGE + index + 1}
                 </td>
-                <td className="px-6 py-3">{row.name}</td>
                 {canSeeEntities && (
                   <td className="px-6 py-3">{entityNames(row.entities)}</td>
                 )}
+                <td className="px-6 py-3">{row.name}</td>
                 <td className="px-6 py-3">
                   <div className="flex items-center justify-center gap-2">
                     {canUpdate && (
@@ -271,7 +309,10 @@ export default function LookupPage({ title, noun, storageKey, permPath }) {
                         }}
                         className="rounded-lg bg-cyan-600 p-2 text-white hover:bg-cyan-700"
                       >
-                        <Icon icon="fa6-solid:pen-to-square" className="h-3 w-3" />
+                        <Icon
+                          icon="fa6-solid:pen-to-square"
+                          className="h-3 w-3"
+                        />
                       </button>
                     )}
                     {canDelete && (
@@ -319,6 +360,7 @@ export default function LookupPage({ title, noun, storageKey, permPath }) {
         onSubmit={handleSubmit}
         initialData={editing}
         noun={noun}
+        rows={rows}
       />
 
       {toDelete && (
@@ -355,3 +397,4 @@ export default function LookupPage({ title, noun, storageKey, permPath }) {
     </div>
   );
 }
+

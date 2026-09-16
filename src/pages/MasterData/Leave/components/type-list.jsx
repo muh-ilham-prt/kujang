@@ -43,20 +43,20 @@ export default function LeaveTypeList({ onNotify }) {
   const filtered = types.filter(
     (t) =>
       inScope(session, t) &&
-      (!query || t.meat_abs_type_name.toLowerCase().includes(query))
+      (!query || t.meat_abs_type_name.toLowerCase().includes(query)),
   );
   const totalPages = Math.ceil(filtered.length / PER_PAGE);
   const pageItems = filtered.slice(
     (currentPage - 1) * PER_PAGE,
-    currentPage * PER_PAGE
+    currentPage * PER_PAGE,
   );
 
   const handleSubmit = (data) => {
     if (editing) {
       setTypes((prev) =>
         prev.map((t) =>
-          t.meat_abs_type === editing.meat_abs_type ? { ...t, ...data } : t
-        )
+          t.meat_abs_type === editing.meat_abs_type ? { ...t, ...data } : t,
+        ),
       );
       onNotify("Jenis cuti berhasil diperbarui");
     } else {
@@ -78,7 +78,7 @@ export default function LeaveTypeList({ onNotify }) {
 
   const handleDelete = () => {
     setTypes((prev) =>
-      prev.filter((t) => t.meat_abs_type !== toDelete.meat_abs_type)
+      prev.filter((t) => t.meat_abs_type !== toDelete.meat_abs_type),
     );
     onNotify("Jenis cuti berhasil dihapus");
     setToDelete(null);
@@ -98,7 +98,8 @@ export default function LeaveTypeList({ onNotify }) {
           <Icon icon="fa6-solid:plus" className="mr-2 h-3 w-3" />
           Tambah Jenis Cuti
         </button>
-        <input autoComplete="off"
+        <input
+          autoComplete="off"
           type="text"
           aria-label="Cari Jenis Cuti"
           placeholder="Cari jenis cuti..."
@@ -116,9 +117,9 @@ export default function LeaveTypeList({ onNotify }) {
           <thead className="bg-slate-50 text-xs uppercase text-slate-700">
             <tr>
               <th className="w-16 px-6 py-3">No</th>
+              {canSeeEntities && <th className="px-6 py-3">Entity</th>}
               <th className="px-6 py-3">Jenis Cuti</th>
               <th className="px-6 py-3">Deskripsi</th>
-              {canSeeEntities && <th className="px-6 py-3">Entity</th>}
               <th className="px-6 py-3">Quota Awal</th>
               <th className="px-6 py-3">Periode Quota</th>
               <th className="px-6 py-3 text-center">Aksi</th>
@@ -133,11 +134,11 @@ export default function LeaveTypeList({ onNotify }) {
                 <td className="px-6 py-3">
                   {(currentPage - 1) * PER_PAGE + index + 1}
                 </td>
-                <td className="px-6 py-3">{type.meat_abs_type_name}</td>
-                <td className="px-6 py-3">{type.meat_abs_type_desc || "-"}</td>
                 {canSeeEntities && (
                   <td className="px-6 py-3">{entityNames(type.entities)}</td>
                 )}
+                <td className="px-6 py-3">{type.meat_abs_type_name}</td>
+                <td className="px-6 py-3">{type.meat_abs_type_desc || "-"}</td>
                 <td className="px-6 py-3">
                   {type.meat_quota_default > 0
                     ? `${type.meat_quota_default} hari`
@@ -158,7 +159,10 @@ export default function LeaveTypeList({ onNotify }) {
                       }}
                       className="rounded-lg bg-cyan-600 p-2 text-white hover:bg-cyan-700"
                     >
-                      <Icon icon="fa6-solid:pen-to-square" className="h-3 w-3" />
+                      <Icon
+                        icon="fa6-solid:pen-to-square"
+                        className="h-3 w-3"
+                      />
                     </button>
                     <button
                       type="button"
@@ -202,6 +206,7 @@ export default function LeaveTypeList({ onNotify }) {
         onClose={() => setShowForm(false)}
         onSubmit={handleSubmit}
         initialData={editing}
+        types={types}
       />
 
       {toDelete && (
@@ -238,3 +243,4 @@ export default function LeaveTypeList({ onNotify }) {
     </>
   );
 }
+

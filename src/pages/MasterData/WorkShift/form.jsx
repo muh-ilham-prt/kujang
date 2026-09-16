@@ -3,6 +3,15 @@ import MultiSelect from "../../../components/MultiSelect";
 import useSession, { isSuperuser, useEntities } from "../../../hooks/useSession";
 import { useClients } from "../Client";
 
+// Internal system key — derived from the name so the system can find a work shift
+// reliably without trusting hand-typed labels. Never rendered.
+export const slugify = (name) =>
+  String(name)
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
 // ponytail: static options — swap for fetchWorkHourTypes when the API lands
 const SHIFT_TYPES = [
   { value: "1", label: "Reguler" },
@@ -50,8 +59,10 @@ export default function WorkShiftForm({
   onClose,
   onSubmit,
   initialData,
+  workShifts = [],
 }) {
   const [formData, setFormData] = useState(EMPTY);
+  const [error, setError] = useState(null);
   const [session] = useSession();
   const { entityOptions } = useEntities();
   const clients = useClients();
@@ -61,6 +72,7 @@ export default function WorkShiftForm({
 
   useEffect(() => {
     setFormData(initialData ? { ...EMPTY, ...initialData } : EMPTY);
+    setError(null);
   }, [initialData, show]);
 
   if (!show) return null;
@@ -68,14 +80,29 @@ export default function WorkShiftForm({
   const field = (name, value) => setFormData({ ...formData, [name]: value });
   const toggleDay = (key) =>
     field(`gwh_work_${key}`, formData[`gwh_work_${key}`] === "Y" ? "N" : "Y");
+  const slug = slugify(formData.gwh_work_name);
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    // Slug is invisible, so surface the conflict in terms of the visible name.
+    // A slug may repeat across entities — only a clash inside the same entity is an error.
+    const mine = (formData.entities || []).map(String);
+    const sharesEntity = (s) =>
+      (s.entities || []).map(String).some((id) => mine.includes(id));
+    const duplicate = workShifts.some(
+      (s) =>
+        s.gwh_id !== initialData?.gwh_id &&
+        sharesEntity(s) &&
+        (s.gwh_work_slug || slugify(s.gwh_work_name)) === slug
+    );
+    if (duplicate) {
+      return setError("Nama jam kerja sudah terdaftar di entity ini. Gunakan nama lain.");
+    }
     // Keep the existing scope untouched when the editor cannot change it
     onSubmit(
       canAssignEntities
-        ? formData
-        : { ...formData, entities: initialData?.entities || [] }
+        ? { ...formData, gwh_work_slug: slug }
+        : { ...formData, gwh_work_slug: slug, entities: initialData?.entities || [] }
     );
   };
 
@@ -114,6 +141,12 @@ export default function WorkShiftForm({
 
         <form onSubmit={handleSubmit}>
           <div className="space-y-4 px-6 py-4">
+            {error && (
+              <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800">
+                {error}
+              </div>
+            )}
+
             {canAssignEntities && (
               <div>
                 <span className={labelClass}>Entity</span>

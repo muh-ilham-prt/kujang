@@ -44,10 +44,10 @@ const COLUMNS = [
 export default function WorkShift() {
   // No seeds — localStorage is the only source of data
   const [shifts, setShifts] = useLocalState("workShifts", []);
-    const [session] = useSession();
-    const canCreate = can(session, PERM_PATH, "create");
-    const canUpdate = can(session, PERM_PATH, "update");
-    const canDelete = can(session, PERM_PATH, "delete");
+  const [session] = useSession();
+  const canCreate = can(session, PERM_PATH, "create");
+  const canUpdate = can(session, PERM_PATH, "update");
+  const canDelete = can(session, PERM_PATH, "delete");
   const { entityNames } = useEntities();
   const clientOptions = useClients();
   // Entity scope is only meaningful to a superuser or an account spanning several entities
@@ -68,12 +68,12 @@ export default function WorkShift() {
         filters.clients.includes(String(s.gwh_customer))) &&
       (!filters.type || String(s.gwh_whtype) === filters.type) &&
       (!filters.name ||
-        s.gwh_work_name.toLowerCase().includes(filters.name.toLowerCase()))
+        s.gwh_work_name.toLowerCase().includes(filters.name.toLowerCase())),
   );
   const totalPages = Math.ceil(filtered.length / PER_PAGE);
   const pageItems = filtered.slice(
     (currentPage - 1) * PER_PAGE,
-    currentPage * PER_PAGE
+    currentPage * PER_PAGE,
   );
 
   const setFilter = (key, value) => {
@@ -84,7 +84,7 @@ export default function WorkShift() {
   const handleSubmit = (data) => {
     if (editing) {
       setShifts((prev) =>
-        prev.map((s) => (s.gwh_id === editing.gwh_id ? { ...s, ...data } : s))
+        prev.map((s) => (s.gwh_id === editing.gwh_id ? { ...s, ...data } : s)),
       );
       setSuccessMessage("Jam kerja berhasil diperbarui");
     } else {
@@ -115,17 +115,17 @@ export default function WorkShift() {
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold text-primary">Manajemen Jam Kerja</h1>
         {canCreate && (
-        <button
-          type="button"
-          onClick={() => {
-            setEditing(null);
-            setShowForm(true);
-          }}
-          className="flex items-center rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-700"
-        >
-          <Icon icon="fa6-solid:plus" className="mr-2 h-3 w-3" />
-          Tambah Jam Kerja
-        </button>
+          <button
+            type="button"
+            onClick={() => {
+              setEditing(null);
+              setShowForm(true);
+            }}
+            className="flex items-center rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-700"
+          >
+            <Icon icon="fa6-solid:plus" className="mr-2 h-3 w-3" />
+            Tambah Jam Kerja
+          </button>
         )}
       </div>
 
@@ -165,7 +165,8 @@ export default function WorkShift() {
             >
               Tipe Jam Kerja
             </label>
-            <select autoComplete="off"
+            <select
+              autoComplete="off"
               id="filter-type"
               value={filters.type}
               onChange={(e) => setFilter("type", e.target.value)}
@@ -187,7 +188,8 @@ export default function WorkShift() {
             >
               Nama Jam Kerja
             </label>
-            <input autoComplete="off"
+            <input
+              autoComplete="off"
               id="filter-name"
               type="text"
               placeholder="Contoh: Shift 1"
@@ -218,6 +220,7 @@ export default function WorkShift() {
           <thead className="bg-slate-50 text-xs uppercase text-slate-700">
             <tr>
               <th className="w-16 px-6 py-3">No</th>
+              {canSeeEntities && <th className="px-6 py-3">Entity</th>}
               <th className="whitespace-nowrap px-6 py-3">Nama</th>
               <th className="whitespace-nowrap px-6 py-3">Tipe Jam Kerja</th>
               <th className="whitespace-nowrap px-6 py-3">Klien</th>
@@ -226,7 +229,6 @@ export default function WorkShift() {
                   {label}
                 </th>
               ))}
-              {canSeeEntities && <th className="px-6 py-3">Entity</th>}
               <th className="px-6 py-3 text-center">Aksi</th>
             </tr>
           </thead>
@@ -239,6 +241,9 @@ export default function WorkShift() {
                 <td className="px-6 py-3">
                   {(currentPage - 1) * PER_PAGE + index + 1}
                 </td>
+                {canSeeEntities && (
+                  <td className="px-6 py-3">{entityNames(shift.entities)}</td>
+                )}
                 <td className="whitespace-nowrap px-6 py-3">
                   {shift.gwh_work_name || "-"}
                 </td>
@@ -253,35 +258,35 @@ export default function WorkShift() {
                     {shift[key] || "-"}
                   </td>
                 ))}
-                {canSeeEntities && (
-                  <td className="px-6 py-3">{entityNames(shift.entities)}</td>
-                )}
                 <td className="px-6 py-3">
                   <div className="flex items-center justify-center gap-2">
                     {canUpdate && (
-                    <button
-                      type="button"
-                      data-tooltip="Edit"
-                      aria-label="Edit"
-                      onClick={() => {
-                        setEditing(shift);
-                        setShowForm(true);
-                      }}
-                      className="rounded-lg bg-cyan-600 p-2 text-white hover:bg-cyan-700"
-                    >
-                      <Icon icon="fa6-solid:pen-to-square" className="h-3 w-3" />
-                    </button>
+                      <button
+                        type="button"
+                        data-tooltip="Edit"
+                        aria-label="Edit"
+                        onClick={() => {
+                          setEditing(shift);
+                          setShowForm(true);
+                        }}
+                        className="rounded-lg bg-cyan-600 p-2 text-white hover:bg-cyan-700"
+                      >
+                        <Icon
+                          icon="fa6-solid:pen-to-square"
+                          className="h-3 w-3"
+                        />
+                      </button>
                     )}
                     {canDelete && (
-                    <button
-                      type="button"
-                      data-tooltip="Hapus"
-                      aria-label="Hapus"
-                      onClick={() => setToDelete(shift)}
-                      className="rounded-lg bg-red-600 p-2 text-white hover:bg-red-700"
-                    >
-                      <Icon icon="fa6-solid:trash" className="h-3 w-3" />
-                    </button>
+                      <button
+                        type="button"
+                        data-tooltip="Hapus"
+                        aria-label="Hapus"
+                        onClick={() => setToDelete(shift)}
+                        className="rounded-lg bg-red-600 p-2 text-white hover:bg-red-700"
+                      >
+                        <Icon icon="fa6-solid:trash" className="h-3 w-3" />
+                      </button>
                     )}
                   </div>
                 </td>
@@ -316,6 +321,7 @@ export default function WorkShift() {
         onClose={() => setShowForm(false)}
         onSubmit={handleSubmit}
         initialData={editing}
+        workShifts={shifts}
       />
 
       {toDelete && (
@@ -352,3 +358,4 @@ export default function WorkShift() {
     </div>
   );
 }
+

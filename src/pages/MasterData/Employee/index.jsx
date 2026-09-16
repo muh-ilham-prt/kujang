@@ -47,10 +47,10 @@ const filterInputClass =
 export default function Employee() {
   // No seeds — localStorage is the only source of data
   const [employees, setEmployees] = useLocalState("employees", []);
-    const [session] = useSession();
-    const canCreate = can(session, PERM_PATH, "create");
-    const canUpdate = can(session, PERM_PATH, "update");
-    const canDelete = can(session, PERM_PATH, "delete");
+  const [session] = useSession();
+  const canCreate = can(session, PERM_PATH, "create");
+  const canUpdate = can(session, PERM_PATH, "update");
+  const canDelete = can(session, PERM_PATH, "delete");
   const { entityNames } = useEntities();
   const clientOptions = useClients();
   const levelOptions = useLevels();
@@ -76,12 +76,12 @@ export default function Employee() {
         filters.clients.includes(String(e.mem_customer_id))) &&
       (!search ||
         e.mem_empy_name.toLowerCase().includes(search) ||
-        e.mem_empy_nip.toLowerCase().includes(search))
+        e.mem_empy_nip.toLowerCase().includes(search)),
   );
   const totalPages = Math.ceil(filtered.length / PER_PAGE);
   const pageItems = filtered.slice(
     (currentPage - 1) * PER_PAGE,
-    currentPage * PER_PAGE
+    currentPage * PER_PAGE,
   );
 
   const setFilter = (key, value) => {
@@ -93,8 +93,8 @@ export default function Employee() {
     if (editing) {
       setEmployees((prev) =>
         prev.map((e) =>
-          e.mem_empy_id === editing.mem_empy_id ? { ...e, ...data } : e
-        )
+          e.mem_empy_id === editing.mem_empy_id ? { ...e, ...data } : e,
+        ),
       );
       setSuccessMessage("Karyawan berhasil diperbarui");
     } else {
@@ -122,7 +122,7 @@ export default function Employee() {
 
   const handleDelete = (employee) => {
     setEmployees((prev) =>
-      prev.filter((e) => e.mem_empy_id !== employee.mem_empy_id)
+      prev.filter((e) => e.mem_empy_id !== employee.mem_empy_id),
     );
     setSuccessMessage("Karyawan berhasil dihapus");
   };
@@ -132,23 +132,33 @@ export default function Employee() {
 
   // ponytail: CSV (Excel opens it natively) — switch to a real .xlsx when the API exports one
   const exportExcel = () => {
-    const headers = ["NIP", "Nama", "No. Telepon", "Atasan", "Level", "Jabatan", "Klien"];
+    const headers = [
+      "NIP",
+      "Nama",
+      "No. Telepon",
+      "Atasan",
+      "Level",
+      "Jabatan",
+      "Klien",
+    ];
     const rows = filtered.map((e) => [
       e.mem_empy_nip,
       e.mem_empy_name,
       e.mem_account_phone,
       supervisorName(e.mem_empy_upper),
-      labelOf(levelOptions,e.mem_empy_level),
-      labelOf(positionOptions,e.mem_empy_position),
-      labelOf(clientOptions,e.mem_customer_id),
+      labelOf(levelOptions, e.mem_empy_level),
+      labelOf(positionOptions, e.mem_empy_position),
+      labelOf(clientOptions, e.mem_customer_id),
     ]);
     // A leading "=" or "+" turns a cell into a formula in Excel — prefix those with a quote
     const cell = (v) =>
-      `"${String(v ?? "").replace(/^[=+\-@]/, "'$&").replace(/"/g, '""')}"`;
+      `"${String(v ?? "")
+        .replace(/^[=+\-@]/, "'$&")
+        .replace(/"/g, '""')}"`;
     const csv = [headers, ...rows].map((r) => r.map(cell).join(",")).join("\n");
     // BOM so Excel reads UTF-8 correctly
     const url = URL.createObjectURL(
-      new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" })
+      new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" }),
     );
     const link = document.createElement("a");
     link.href = url;
@@ -162,15 +172,16 @@ export default function Employee() {
     const w = window.open("", "_blank", "width=800,height=900");
     if (!w) return;
     // Employee fields are user input — escape before writing into the print window
-    const esc = (s) => String(s ?? "-").replace(/[<>&]/g, (c) => `&#${c.charCodeAt(0)};`);
+    const esc = (s) =>
+      String(s ?? "-").replace(/[<>&]/g, (c) => `&#${c.charCodeAt(0)};`);
     const rows = [
       ["NIP", employee.mem_empy_nip],
       ["Nama", employee.mem_empy_name],
       ["No. Telepon", employee.mem_account_phone],
       ["Atasan", supervisorName(employee.mem_empy_upper)],
-      ["Level", labelOf(levelOptions,employee.mem_empy_level)],
-      ["Jabatan", labelOf(positionOptions,employee.mem_empy_position)],
-      ["Penempatan", labelOf(clientOptions,employee.mem_customer_id)],
+      ["Level", labelOf(levelOptions, employee.mem_empy_level)],
+      ["Jabatan", labelOf(positionOptions, employee.mem_empy_position)],
+      ["Penempatan", labelOf(clientOptions, employee.mem_customer_id)],
     ];
     w.document.write(
       `<title>Data Karyawan - ${esc(employee.mem_empy_name)}</title>` +
@@ -181,10 +192,10 @@ export default function Employee() {
           .map(
             ([label, value]) =>
               `<tr><th style="border:1px solid #ccc;padding:8px;text-align:left;width:200px;background:#f8fafc">${label}</th>` +
-              `<td style="border:1px solid #ccc;padding:8px">${esc(value)}</td></tr>`
+              `<td style="border:1px solid #ccc;padding:8px">${esc(value)}</td></tr>`,
           )
           .join("") +
-        `</table></body>`
+        `</table></body>`,
     );
     w.document.close();
     w.focus();
@@ -214,17 +225,17 @@ export default function Employee() {
             Import
           </button>
           {canCreate && (
-          <button
-            type="button"
-            onClick={() => {
-              setEditing(null);
-              setShowForm(true);
-            }}
-            className="flex items-center rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-700"
-          >
-            <Icon icon="fa6-solid:plus" className="mr-2 h-3 w-3" />
-            Tambah Karyawan
-          </button>
+            <button
+              type="button"
+              onClick={() => {
+                setEditing(null);
+                setShowForm(true);
+              }}
+              className="flex items-center rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-700"
+            >
+              <Icon icon="fa6-solid:plus" className="mr-2 h-3 w-3" />
+              Tambah Karyawan
+            </button>
           )}
         </div>
       </div>
@@ -244,7 +255,8 @@ export default function Employee() {
       )}
 
       <div className="mb-4 flex flex-wrap justify-end gap-2">
-        <input autoComplete="off"
+        <input
+          autoComplete="off"
           type="text"
           aria-label="Cari Nama atau NIP"
           placeholder="Cari Nama atau NIP..."
@@ -268,10 +280,10 @@ export default function Employee() {
           <thead className="bg-slate-50 text-xs uppercase text-slate-700">
             <tr>
               <th className="w-16 px-6 py-3">No</th>
+              {canSeeEntities && <th className="px-6 py-3">Entity</th>}
               <th className="px-6 py-3">NIP</th>
               <th className="px-6 py-3">Nama</th>
               <th className="px-6 py-3">Penempatan</th>
-              {canSeeEntities && <th className="px-6 py-3">Entity</th>}
               <th className="px-6 py-3">Level</th>
               <th className="px-6 py-3">Jabatan</th>
               <th className="px-6 py-3">Atasan</th>
@@ -288,19 +300,21 @@ export default function Employee() {
                 <td className="px-6 py-3">
                   {(currentPage - 1) * PER_PAGE + index + 1}
                 </td>
+                {canSeeEntities && (
+                  <td className="px-6 py-3">
+                    {entityNames(employee.entities)}
+                  </td>
+                )}
                 <td className="px-6 py-3">{employee.mem_empy_nip}</td>
                 <td className="px-6 py-3">{employee.mem_empy_name}</td>
                 <td className="px-6 py-3">
                   {labelOf(clientOptions, employee.mem_customer_id)}
                 </td>
-                {canSeeEntities && (
-                  <td className="px-6 py-3">{entityNames(employee.entities)}</td>
-                )}
                 <td className="px-6 py-3">
-                  {labelOf(levelOptions,employee.mem_empy_level)}
+                  {labelOf(levelOptions, employee.mem_empy_level)}
                 </td>
                 <td className="px-6 py-3">
-                  {labelOf(positionOptions,employee.mem_empy_position)}
+                  {labelOf(positionOptions, employee.mem_empy_position)}
                 </td>
                 <td className="px-6 py-3">
                   {supervisorName(employee.mem_empy_upper)}
@@ -319,7 +333,7 @@ export default function Employee() {
                           confirmLabel: "Ya, Kirim",
                           onConfirm: () =>
                             setSuccessMessage(
-                              `Password ${employee.mem_empy_name} berhasil dikirim ulang`
+                              `Password ${employee.mem_empy_name} berhasil dikirim ulang`,
                             ),
                         })
                       }
@@ -338,13 +352,16 @@ export default function Employee() {
                           confirmLabel: "Ya, Reset",
                           onConfirm: () =>
                             setSuccessMessage(
-                              `Perangkat ${employee.mem_empy_name} berhasil direset`
+                              `Perangkat ${employee.mem_empy_name} berhasil direset`,
                             ),
                         })
                       }
                       className="rounded-lg bg-purple-600 p-2 text-white hover:bg-purple-700"
                     >
-                      <Icon icon="fa6-solid:mobile-screen" className="h-3 w-3" />
+                      <Icon
+                        icon="fa6-solid:mobile-screen"
+                        className="h-3 w-3"
+                      />
                     </button>
                     <button
                       type="button"
@@ -356,36 +373,39 @@ export default function Employee() {
                       <Icon icon="fa6-solid:file-pdf" className="h-3 w-3" />
                     </button>
                     {canUpdate && (
-                    <button
-                      type="button"
-                      data-tooltip="Edit"
-                      aria-label="Edit"
-                      onClick={() => {
-                        setEditing(employee);
-                        setShowForm(true);
-                      }}
-                      className="rounded-lg bg-cyan-600 p-2 text-white hover:bg-cyan-700"
-                    >
-                      <Icon icon="fa6-solid:pen-to-square" className="h-3 w-3" />
-                    </button>
+                      <button
+                        type="button"
+                        data-tooltip="Edit"
+                        aria-label="Edit"
+                        onClick={() => {
+                          setEditing(employee);
+                          setShowForm(true);
+                        }}
+                        className="rounded-lg bg-cyan-600 p-2 text-white hover:bg-cyan-700"
+                      >
+                        <Icon
+                          icon="fa6-solid:pen-to-square"
+                          className="h-3 w-3"
+                        />
+                      </button>
                     )}
                     {canDelete && (
-                    <button
-                      type="button"
-                      data-tooltip="Hapus"
-                      aria-label="Hapus"
-                      onClick={() =>
-                        setConfirm({
-                          title: "Konfirmasi Hapus",
-                          message: `Apakah Anda yakin ingin menghapus karyawan ${employee.mem_empy_name}?`,
-                          confirmLabel: "Ya, Hapus",
-                          onConfirm: () => handleDelete(employee),
-                        })
-                      }
-                      className="rounded-lg bg-red-600 p-2 text-white hover:bg-red-700"
-                    >
-                      <Icon icon="fa6-solid:trash" className="h-3 w-3" />
-                    </button>
+                      <button
+                        type="button"
+                        data-tooltip="Hapus"
+                        aria-label="Hapus"
+                        onClick={() =>
+                          setConfirm({
+                            title: "Konfirmasi Hapus",
+                            message: `Apakah Anda yakin ingin menghapus karyawan ${employee.mem_empy_name}?`,
+                            confirmLabel: "Ya, Hapus",
+                            onConfirm: () => handleDelete(employee),
+                          })
+                        }
+                        className="rounded-lg bg-red-600 p-2 text-white hover:bg-red-700"
+                      >
+                        <Icon icon="fa6-solid:trash" className="h-3 w-3" />
+                      </button>
                     )}
                   </div>
                 </td>
@@ -463,3 +483,4 @@ export default function Employee() {
     </div>
   );
 }
+

@@ -53,10 +53,10 @@ const filterInputClass =
 export default function Location() {
   // No seeds — localStorage is the only source of data
   const [locations, setLocations] = useLocalState("locations", []);
-    const [session] = useSession();
-    const canCreate = can(session, PERM_PATH, "create");
-    const canUpdate = can(session, PERM_PATH, "update");
-    const canDelete = can(session, PERM_PATH, "delete");
+  const [session] = useSession();
+  const canCreate = can(session, PERM_PATH, "create");
+  const canUpdate = can(session, PERM_PATH, "update");
+  const canDelete = can(session, PERM_PATH, "delete");
   const { entityNames } = useEntities();
   const clientOptions = useClients();
   // Entity scope is only meaningful to a superuser or an account spanning several entities
@@ -80,12 +80,12 @@ export default function Location() {
       (!filters.type || String(l.mlm_loc_type) === filters.type) &&
       (!search ||
         l.mlm_loc_name.toLowerCase().includes(search) ||
-        l.mlm_loc_short.toLowerCase().includes(search))
+        l.mlm_loc_short.toLowerCase().includes(search)),
   );
   const totalPages = Math.ceil(filtered.length / PER_PAGE);
   const pageItems = filtered.slice(
     (currentPage - 1) * PER_PAGE,
-    currentPage * PER_PAGE
+    currentPage * PER_PAGE,
   );
 
   const setFilter = (key, value) => {
@@ -97,8 +97,8 @@ export default function Location() {
     if (editing) {
       setLocations((prev) =>
         prev.map((l) =>
-          l.mlm_loc_id === editing.mlm_loc_id ? { ...l, ...data } : l
-        )
+          l.mlm_loc_id === editing.mlm_loc_id ? { ...l, ...data } : l,
+        ),
       );
       setSuccessMessage("Lokasi berhasil diperbarui");
     } else {
@@ -125,12 +125,13 @@ export default function Location() {
     const w = window.open("", "_blank", "width=600,height=700");
     if (!w) return;
     // Location names are user input — escape before writing into the print window
-    const esc = (s) => String(s).replace(/[<>&]/g, (c) => `&#${c.charCodeAt(0)};`);
+    const esc = (s) =>
+      String(s).replace(/[<>&]/g, (c) => `&#${c.charCodeAt(0)};`);
     const title = `${esc(qrLocation.mlm_loc_name)} (${esc(qrLocation.mlm_loc_short)})`;
     w.document.write(
       `<title>QR Code - ${title}</title>` +
         `<body style="text-align:center;font-family:sans-serif">` +
-        `<h2>${title}</h2>${svg}</body>`
+        `<h2>${title}</h2>${svg}</body>`,
     );
     w.document.close();
     w.focus();
@@ -139,7 +140,7 @@ export default function Location() {
 
   const handleDelete = () => {
     setLocations((prev) =>
-      prev.filter((l) => l.mlm_loc_id !== toDelete.mlm_loc_id)
+      prev.filter((l) => l.mlm_loc_id !== toDelete.mlm_loc_id),
     );
     setSuccessMessage("Lokasi berhasil dihapus");
     setToDelete(null);
@@ -150,17 +151,17 @@ export default function Location() {
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold text-primary">Manajemen Lokasi</h1>
         {canCreate && (
-        <button
-          type="button"
-          onClick={() => {
-            setEditing(null);
-            setShowForm(true);
-          }}
-          className="flex items-center rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-700"
-        >
-          <Icon icon="fa6-solid:plus" className="mr-2 h-3 w-3" />
-          Tambah Lokasi
-        </button>
+          <button
+            type="button"
+            onClick={() => {
+              setEditing(null);
+              setShowForm(true);
+            }}
+            className="flex items-center rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-700"
+          >
+            <Icon icon="fa6-solid:plus" className="mr-2 h-3 w-3" />
+            Tambah Lokasi
+          </button>
         )}
       </div>
 
@@ -200,7 +201,8 @@ export default function Location() {
             >
               Jenis Lokasi
             </label>
-            <select autoComplete="off"
+            <select
+              autoComplete="off"
               id="filter-type"
               value={filters.type}
               onChange={(e) => setFilter("type", e.target.value)}
@@ -222,7 +224,8 @@ export default function Location() {
             >
               Pencarian
             </label>
-            <input autoComplete="off"
+            <input
+              autoComplete="off"
               id="filter-search"
               type="text"
               placeholder="Cari nama lokasi atau singkatan..."
@@ -253,11 +256,11 @@ export default function Location() {
           <thead className="bg-slate-50 text-xs uppercase text-slate-700">
             <tr>
               <th className="w-16 px-6 py-3">No</th>
+              {canSeeEntities && <th className="px-6 py-3">Entity</th>}
               <th className="px-6 py-3">Nama Lokasi</th>
               <th className="px-6 py-3">Singkatan</th>
               <th className="px-6 py-3">Jenis Lokasi</th>
               <th className="px-6 py-3">Klien</th>
-              {canSeeEntities && <th className="px-6 py-3">Entity</th>}
               <th className="px-6 py-3">Latitude</th>
               <th className="px-6 py-3">Longitude</th>
               <th className="px-6 py-3 text-center">QR Code</th>
@@ -273,6 +276,9 @@ export default function Location() {
                 <td className="px-6 py-3">
                   {(currentPage - 1) * PER_PAGE + index + 1}
                 </td>
+                {canSeeEntities && (
+                  <td className="px-6 py-3">{entityNames(loc.entities)}</td>
+                )}
                 <td className="px-6 py-3">{loc.mlm_loc_name}</td>
                 <td className="px-6 py-3">{loc.mlm_loc_short}</td>
                 <td className="px-6 py-3">
@@ -281,9 +287,6 @@ export default function Location() {
                 <td className="px-6 py-3">
                   {labelOf(clientOptions, loc.mlm_customer)}
                 </td>
-                {canSeeEntities && (
-                  <td className="px-6 py-3">{entityNames(loc.entities)}</td>
-                )}
                 <td className="px-6 py-3">{loc.mlm_loc_lat || "-"}</td>
                 <td className="px-6 py-3">{loc.mlm_loc_lon || "-"}</td>
                 <td className="px-6 py-3">
@@ -316,29 +319,32 @@ export default function Location() {
                       <Icon icon="fa6-solid:qrcode" className="h-3 w-3" />
                     </button>
                     {canUpdate && (
-                    <button
-                      type="button"
-                      data-tooltip="Edit"
-                      aria-label="Edit"
-                      onClick={() => {
-                        setEditing(loc);
-                        setShowForm(true);
-                      }}
-                      className="rounded-lg bg-cyan-600 p-2 text-white hover:bg-cyan-700"
-                    >
-                      <Icon icon="fa6-solid:pen-to-square" className="h-3 w-3" />
-                    </button>
+                      <button
+                        type="button"
+                        data-tooltip="Edit"
+                        aria-label="Edit"
+                        onClick={() => {
+                          setEditing(loc);
+                          setShowForm(true);
+                        }}
+                        className="rounded-lg bg-cyan-600 p-2 text-white hover:bg-cyan-700"
+                      >
+                        <Icon
+                          icon="fa6-solid:pen-to-square"
+                          className="h-3 w-3"
+                        />
+                      </button>
                     )}
                     {canDelete && (
-                    <button
-                      type="button"
-                      data-tooltip="Hapus"
-                      aria-label="Hapus"
-                      onClick={() => setToDelete(loc)}
-                      className="rounded-lg bg-red-600 p-2 text-white hover:bg-red-700"
-                    >
-                      <Icon icon="fa6-solid:trash" className="h-3 w-3" />
-                    </button>
+                      <button
+                        type="button"
+                        data-tooltip="Hapus"
+                        aria-label="Hapus"
+                        onClick={() => setToDelete(loc)}
+                        className="rounded-lg bg-red-600 p-2 text-white hover:bg-red-700"
+                      >
+                        <Icon icon="fa6-solid:trash" className="h-3 w-3" />
+                      </button>
                     )}
                   </div>
                 </td>
@@ -373,6 +379,7 @@ export default function Location() {
         onClose={() => setShowForm(false)}
         onSubmit={handleSubmit}
         initialData={editing}
+        locations={locations}
       />
 
       {qrLocation && (
@@ -450,3 +457,4 @@ export default function Location() {
     </div>
   );
 }
+

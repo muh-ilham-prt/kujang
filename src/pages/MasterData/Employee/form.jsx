@@ -33,6 +33,7 @@ export default function EmployeeForm({
   employees = [],
 }) {
   const [formData, setFormData] = useState(EMPTY);
+  const [error, setError] = useState(null);
   const [session] = useSession();
   const { entityOptions } = useEntities();
   // Every option list is entity-scoped, so it follows the session automatically
@@ -50,6 +51,7 @@ export default function EmployeeForm({
 
   useEffect(() => {
     setFormData(initialData ? { ...EMPTY, ...initialData } : EMPTY);
+    setError(null);
   }, [initialData, show]);
 
   if (!show) return null;
@@ -68,6 +70,17 @@ export default function EmployeeForm({
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    // NIP is the employee's identity — it must be unique across all entities.
+    // The NIP input is locked on edit, so any duplicate outside the row is an error.
+    const nip = formData.mem_empy_nip.trim();
+    const duplicate = employees.some(
+      (emp) =>
+        emp.mem_empy_id !== initialData?.mem_empy_id &&
+        emp.mem_empy_nip === nip
+    );
+    if (duplicate) {
+      return setError("NIP sudah terdaftar. Gunakan NIP lain.");
+    }
     // Keep the existing scope untouched when the editor cannot change it
     onSubmit(
       canAssignEntities
@@ -100,6 +113,12 @@ export default function EmployeeForm({
 
         <form onSubmit={handleSubmit}>
           <div className="space-y-4 px-6 py-4">
+            {error && (
+              <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800">
+                {error}
+              </div>
+            )}
+
             <div className="flex justify-center">
               <img
                 src={formData.mem_empy_pict || defaultAvatar}

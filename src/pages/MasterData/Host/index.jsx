@@ -28,10 +28,10 @@ const filterInputClass =
 export default function Host() {
   // No seeds — localStorage is the only source of data
   const [hosts, setHosts] = useLocalState("hosts", []);
-    const [session] = useSession();
-    const canCreate = can(session, PERM_PATH, "create");
-    const canUpdate = can(session, PERM_PATH, "update");
-    const canDelete = can(session, PERM_PATH, "delete");
+  const [session] = useSession();
+  const canCreate = can(session, PERM_PATH, "create");
+  const canUpdate = can(session, PERM_PATH, "update");
+  const canDelete = can(session, PERM_PATH, "delete");
   const { entityNames } = useEntities();
   const clientOptions = useClients();
   // Entity scope is only meaningful to a superuser or an account spanning several entities
@@ -51,12 +51,12 @@ export default function Host() {
       inScope(session, h) &&
       (!filters.clients.length ||
         filters.clients.includes(String(h.mcr_customer))) &&
-      (!search || h.mcr_cust_name.toLowerCase().includes(search))
+      (!search || h.mcr_cust_name.toLowerCase().includes(search)),
   );
   const totalPages = Math.ceil(filtered.length / PER_PAGE);
   const pageItems = filtered.slice(
     (currentPage - 1) * PER_PAGE,
-    currentPage * PER_PAGE
+    currentPage * PER_PAGE,
   );
 
   const setFilter = (key, value) => {
@@ -68,8 +68,8 @@ export default function Host() {
     if (editing) {
       setHosts((prev) =>
         prev.map((h) =>
-          h.mcr_resident_id === editing.mcr_resident_id ? { ...h, ...data } : h
-        )
+          h.mcr_resident_id === editing.mcr_resident_id ? { ...h, ...data } : h,
+        ),
       );
       setSuccessMessage("Penerima tamu berhasil diperbarui");
     } else {
@@ -91,7 +91,7 @@ export default function Host() {
 
   const handleDelete = () => {
     setHosts((prev) =>
-      prev.filter((h) => h.mcr_resident_id !== toDelete.mcr_resident_id)
+      prev.filter((h) => h.mcr_resident_id !== toDelete.mcr_resident_id),
     );
     setSuccessMessage("Penerima tamu berhasil dihapus");
     setToDelete(null);
@@ -104,17 +104,17 @@ export default function Host() {
           Manajemen Penerima Tamu
         </h1>
         {canCreate && (
-        <button
-          type="button"
-          onClick={() => {
-            setEditing(null);
-            setShowForm(true);
-          }}
-          className="flex items-center rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-700"
-        >
-          <Icon icon="fa6-solid:plus" className="mr-2 h-3 w-3" />
-          Tambah Penerima Tamu
-        </button>
+          <button
+            type="button"
+            onClick={() => {
+              setEditing(null);
+              setShowForm(true);
+            }}
+            className="flex items-center rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-700"
+          >
+            <Icon icon="fa6-solid:plus" className="mr-2 h-3 w-3" />
+            Tambah Penerima Tamu
+          </button>
         )}
       </div>
 
@@ -133,7 +133,8 @@ export default function Host() {
       )}
 
       <div className="mb-4 flex flex-wrap justify-end gap-2">
-        <input autoComplete="off"
+        <input
+          autoComplete="off"
           type="text"
           aria-label="Cari Nama Penerima Tamu"
           placeholder="Cari nama penerima tamu..."
@@ -157,9 +158,9 @@ export default function Host() {
           <thead className="bg-slate-50 text-xs uppercase text-slate-700">
             <tr>
               <th className="w-16 px-6 py-3">No</th>
+              {canSeeEntities && <th className="px-6 py-3">Entity</th>}
               <th className="px-6 py-3">Nama Penerima Tamu</th>
               <th className="px-6 py-3">Klien</th>
-              {canSeeEntities && <th className="px-6 py-3">Entity</th>}
               <th className="px-6 py-3">No. Telepon</th>
               <th className="px-6 py-3">Divisi</th>
               <th className="px-6 py-3 text-center">Aksi</th>
@@ -174,41 +175,44 @@ export default function Host() {
                 <td className="px-6 py-3">
                   {(currentPage - 1) * PER_PAGE + index + 1}
                 </td>
+                {canSeeEntities && (
+                  <td className="px-6 py-3">{entityNames(host.entities)}</td>
+                )}
                 <td className="px-6 py-3">{host.mcr_cust_name}</td>
                 <td className="px-6 py-3">
                   {labelOf(clientOptions, host.mcr_customer)}
                 </td>
-                {canSeeEntities && (
-                  <td className="px-6 py-3">{entityNames(host.entities)}</td>
-                )}
                 <td className="px-6 py-3">{host.mcm_phone_hp || "-"}</td>
                 <td className="px-6 py-3">{host.mcm_division}</td>
                 <td className="px-6 py-3">
                   <div className="flex items-center justify-center gap-2">
                     {canUpdate && (
-                    <button
-                      type="button"
-                      data-tooltip="Edit"
-                      aria-label="Edit"
-                      onClick={() => {
-                        setEditing(host);
-                        setShowForm(true);
-                      }}
-                      className="rounded-lg bg-cyan-600 p-2 text-white hover:bg-cyan-700"
-                    >
-                      <Icon icon="fa6-solid:pen-to-square" className="h-3 w-3" />
-                    </button>
+                      <button
+                        type="button"
+                        data-tooltip="Edit"
+                        aria-label="Edit"
+                        onClick={() => {
+                          setEditing(host);
+                          setShowForm(true);
+                        }}
+                        className="rounded-lg bg-cyan-600 p-2 text-white hover:bg-cyan-700"
+                      >
+                        <Icon
+                          icon="fa6-solid:pen-to-square"
+                          className="h-3 w-3"
+                        />
+                      </button>
                     )}
                     {canDelete && (
-                    <button
-                      type="button"
-                      data-tooltip="Hapus"
-                      aria-label="Hapus"
-                      onClick={() => setToDelete(host)}
-                      className="rounded-lg bg-red-600 p-2 text-white hover:bg-red-700"
-                    >
-                      <Icon icon="fa6-solid:trash" className="h-3 w-3" />
-                    </button>
+                      <button
+                        type="button"
+                        data-tooltip="Hapus"
+                        aria-label="Hapus"
+                        onClick={() => setToDelete(host)}
+                        className="rounded-lg bg-red-600 p-2 text-white hover:bg-red-700"
+                      >
+                        <Icon icon="fa6-solid:trash" className="h-3 w-3" />
+                      </button>
                     )}
                   </div>
                 </td>
@@ -243,6 +247,7 @@ export default function Host() {
         onClose={() => setShowForm(false)}
         onSubmit={handleSubmit}
         initialData={editing}
+        hosts={hosts}
       />
 
       {toDelete && (
@@ -279,3 +284,4 @@ export default function Host() {
     </div>
   );
 }
+

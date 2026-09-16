@@ -98,7 +98,9 @@ export default function User() {
         {
           ...data,
           // Without a scope the new row would be invisible — inherit the creator's
-          entities: data.entities?.length ? data.entities : session?.entities || [],
+          entities: data.entities?.length
+            ? data.entities
+            : session?.entities || [],
           id: Date.now(),
           createdAt: new Date().toISOString(),
         },
@@ -151,7 +153,8 @@ export default function User() {
       )}
 
       <div className="mb-4 flex flex-wrap justify-end gap-2">
-        <input autoComplete="off"
+        <input
+          autoComplete="off"
           type="text"
           aria-label="Cari User"
           placeholder="Cari username atau email..."
@@ -162,7 +165,8 @@ export default function User() {
           }}
           className={filterInputClass}
         />
-        <select autoComplete="off"
+        <select
+          autoComplete="off"
           aria-label="Filter Role"
           value={role}
           onChange={(e) => {
@@ -185,10 +189,10 @@ export default function User() {
           <thead className="bg-slate-50 text-xs uppercase text-slate-700">
             <tr>
               <th className="w-16 px-6 py-3">No</th>
+              {canSeeEntities && <th className="px-6 py-3">Entity</th>}
               <th className="px-6 py-3">Username</th>
               <th className="px-6 py-3">Email</th>
               <th className="px-6 py-3">Role</th>
-              {canSeeEntities && <th className="px-6 py-3">Entity</th>}
               <th className="px-6 py-3">Created At</th>
               <th className="px-6 py-3 text-center">Aksi</th>
             </tr>
@@ -204,6 +208,9 @@ export default function User() {
                   <td className="px-6 py-3">
                     {(currentPage - 1) * PER_PAGE + index + 1}
                   </td>
+                  {canSeeEntities && (
+                    <td className="px-6 py-3">{entityNames(user.entities)}</td>
+                  )}
                   <td className="px-6 py-3 font-medium">{user.username}</td>
                   <td className="px-6 py-3">{user.email}</td>
                   <td className="px-6 py-3">
@@ -215,9 +222,6 @@ export default function User() {
                       {userRole?.label || user.role}
                     </span>
                   </td>
-                  {canSeeEntities && (
-                    <td className="px-6 py-3">{entityNames(user.entities)}</td>
-                  )}
                   <td className="px-6 py-3">{formatDate(user.createdAt)}</td>
                   <td className="px-6 py-3">
                     <div className="flex items-center justify-center gap-2">
@@ -252,7 +256,10 @@ export default function User() {
                               onClick={() => setToDelete(user)}
                               className="rounded-lg bg-red-600 p-2 text-white hover:bg-red-700"
                             >
-                              <Icon icon="fa6-solid:trash" className="h-3 w-3" />
+                              <Icon
+                                icon="fa6-solid:trash"
+                                className="h-3 w-3"
+                              />
                             </button>
                           )}
                         </>

@@ -25,7 +25,17 @@ const countDays = (from, to) => {
   return days > 0 ? days : 0;
 };
 
-export default function LeaveForm({ show, onClose, onSubmit, initialData }) {
+// Two inclusive date ranges overlap when each starts before the other ends.
+const overlaps = (from, to, otherFrom, otherTo) =>
+  from <= otherTo && otherFrom <= to;
+
+export default function LeaveForm({
+  show,
+  onClose,
+  onSubmit,
+  initialData,
+  leaves = [],
+}) {
   const [formData, setFormData] = useState(EMPTY);
   const [error, setError] = useState(null);
   // Both lists are entity-scoped, so they follow the session automatically.
@@ -62,6 +72,29 @@ export default function LeaveForm({ show, onClose, onSubmit, initialData }) {
     e.preventDefault();
     // The date inputs cannot express "to >= from" on their own
     if (days === 0) return setError("Tanggal selesai harus setelah tanggal mulai");
+    // Block overlapping active leave requests for the same employee.
+    // Declined requests don't block; only Open / Verified / Approved do.
+    const ACTIVE = new Set(["Open", "Verified", "Approved"]);
+    const mine = new Set((formData.entities || []).map(String));
+    const sharesEntity = (l) =>
+      (l.entities || []).map(String).some((id) => mine.has(id));
+    const clash = leaves.some(
+      (l) =>
+        l.hal_leave_id !== initialData?.hal_leave_id &&
+        l.hal_empy_nip === formData.hal_empy_nip &&
+        ACTIVE.has(l.hal_request_sts) &&
+        sharesEntity(l) &&
+        overlaps(
+          formData.hal_request_datefr,
+          formData.hal_request_dateto,
+          l.hal_request_datefr,
+          l.hal_request_dateto
+        )
+    );
+    if (clash)
+      return setError(
+        "Karyawan ini sudah memiliki pengajuan cuti aktif pada rentang tanggal tersebut."
+      );
     onSubmit({ ...formData, hal_request_days: days });
   };
 
