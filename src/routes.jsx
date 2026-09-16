@@ -19,10 +19,12 @@ import User from "./pages/User/master";
 import Role from "./pages/User/role";
 import PermissionPage from "./pages/User/permission";
 import NotFound from "./pages/NotFound";
+import ResetData from "./pages/ResetData";
 
 // All routes of the app live here.
 export default [
   { path: "/", element: <Login /> },
+  { path: "/reset", element: <ResetData /> },
   {
     element: <Layout />,
     children: [

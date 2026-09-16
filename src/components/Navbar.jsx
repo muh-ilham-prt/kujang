@@ -25,7 +25,7 @@ export default function Navbar({ toggleSidebar }) {
 
   const handleLogout = () => {
     setSession(null);
-    navigate("/login");
+    navigate("/");
   };
 
   return (

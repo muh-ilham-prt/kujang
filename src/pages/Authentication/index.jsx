@@ -40,7 +40,7 @@ export default function Login() {
       // Never keep the password in the session
       const { password: _, ...safe } = match;
       setSession(safe);
-      navigate("/");
+      navigate("/dashboard");
     } catch {
       setError("Terjadi kesalahan saat menghubungi server");
     } finally {
