@@ -22,11 +22,10 @@ import NotFound from "./pages/NotFound";
 
 // All routes of the app live here.
 export default [
-  { path: "/login", element: <Login /> },
+  { path: "/", element: <Login /> },
   {
     element: <Layout />,
     children: [
-      { path: "/", element: <Dashboard /> },
       { path: "/dashboard", element: <Dashboard /> },
       { path: "/entity", element: <Entity /> },
       { path: "/master/position", element: <Position /> },
@@ -49,3 +48,4 @@ export default [
     ],
   },
 ];
+
