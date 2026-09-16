@@ -114,6 +114,19 @@ export default function WorkShiftForm({
 
         <form onSubmit={handleSubmit}>
           <div className="space-y-4 px-6 py-4">
+            {canAssignEntities && (
+              <div>
+                <span className={labelClass}>Entity</span>
+                <MultiSelect
+                  id="workshift-entities"
+                  options={entityOptions}
+                  value={formData.entities || []}
+                  onChange={(value) => field("entities", value)}
+                  placeholder="Pilih Entity"
+                />
+              </div>
+            )}
+
             <div>
               <label htmlFor="gwh_whtype" className={labelClass}>
                 Tipe Jam Kerja
@@ -152,19 +165,6 @@ export default function WorkShiftForm({
                 ))}
               </select>
             </div>
-
-            {canAssignEntities && (
-              <div>
-                <span className={labelClass}>Entity</span>
-                <MultiSelect
-                  id="workshift-entities"
-                  options={entityOptions}
-                  value={formData.entities || []}
-                  onChange={(value) => field("entities", value)}
-                  placeholder="Pilih Entity"
-                />
-              </div>
-            )}
 
             <div>
               <label htmlFor="gwh_work_name" className={labelClass}>

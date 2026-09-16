@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import defaultAvatar from "../../../assets/default-user.jpg";
 import MultiSelect from "../../../components/MultiSelect";
-import useSession, { isSuperuser, useEntities } from "../../../hooks/useSession";
+import useSession, {
+  isSuperuser,
+  useEntities,
+} from "../../../hooks/useSession";
 import { useClients } from "../Client";
 import { useLevels } from "../Level";
 import { usePositions } from "../Position";
@@ -69,13 +72,13 @@ export default function EmployeeForm({
     onSubmit(
       canAssignEntities
         ? formData
-        : { ...formData, entities: initialData?.entities || [] }
+        : { ...formData, entities: initialData?.entities || [] },
     );
   };
 
   // Anyone but the employee being edited can be their supervisor.
   const supervisors = employees.filter(
-    (e) => e.mem_empy_nip !== initialData?.mem_empy_nip
+    (e) => e.mem_empy_nip !== initialData?.mem_empy_nip,
   );
 
   return (
@@ -104,13 +107,25 @@ export default function EmployeeForm({
                 className="h-32 w-32 rounded-full object-cover"
               />
             </div>
-
+            {canAssignEntities && (
+              <div>
+                <span className={labelClass}>Entity</span>
+                <MultiSelect
+                  id="employee-entities"
+                  options={entityOptions}
+                  value={formData.entities || []}
+                  onChange={(value) => field("entities", value)}
+                  placeholder="Pilih Entity"
+                />
+              </div>
+            )}
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
                 <label htmlFor="mem_empy_pict" className={labelClass}>
                   Foto Profil
                 </label>
-                <input autoComplete="off"
+                <input
+                  autoComplete="off"
                   id="mem_empy_pict"
                   type="file"
                   accept="image/*"
@@ -123,7 +138,8 @@ export default function EmployeeForm({
                 <label htmlFor="mem_empy_nip" className={labelClass}>
                   NIP
                 </label>
-                <input autoComplete="off"
+                <input
+                  autoComplete="off"
                   id="mem_empy_nip"
                   value={formData.mem_empy_nip}
                   onChange={(e) => field("mem_empy_nip", e.target.value)}
@@ -141,7 +157,8 @@ export default function EmployeeForm({
                 <label htmlFor="mem_empy_name" className={labelClass}>
                   Nama
                 </label>
-                <input autoComplete="off"
+                <input
+                  autoComplete="off"
                   id="mem_empy_name"
                   value={formData.mem_empy_name}
                   onChange={(e) => field("mem_empy_name", e.target.value)}
@@ -155,7 +172,8 @@ export default function EmployeeForm({
                 <label htmlFor="mem_account_phone" className={labelClass}>
                   Telepon
                 </label>
-                <input autoComplete="off"
+                <input
+                  autoComplete="off"
                   id="mem_account_phone"
                   type="tel"
                   inputMode="numeric"
@@ -168,7 +186,6 @@ export default function EmployeeForm({
                   className={inputClass}
                 />
               </div>
-
             </div>
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -176,7 +193,8 @@ export default function EmployeeForm({
                 <label htmlFor="mem_empy_upper" className={labelClass}>
                   Atasan
                 </label>
-                <select autoComplete="off"
+                <select
+                  autoComplete="off"
                   id="mem_empy_upper"
                   value={formData.mem_empy_upper}
                   onChange={(e) => field("mem_empy_upper", e.target.value)}
@@ -196,7 +214,8 @@ export default function EmployeeForm({
                   <label htmlFor={name} className={labelClass}>
                     {label}
                   </label>
-                  <select autoComplete="off"
+                  <select
+                    autoComplete="off"
                     id={name}
                     value={formData[name]}
                     onChange={(e) => field(name, e.target.value)}
@@ -213,19 +232,6 @@ export default function EmployeeForm({
                 </div>
               ))}
             </div>
-
-            {canAssignEntities && (
-              <div>
-                <span className={labelClass}>Entity</span>
-                <MultiSelect
-                  id="employee-entities"
-                  options={entityOptions}
-                  value={formData.entities || []}
-                  onChange={(value) => field("entities", value)}
-                  placeholder="Pilih Entity"
-                />
-              </div>
-            )}
           </div>
 
           <div className="sticky bottom-0 flex justify-end gap-2 border-t border-slate-200 bg-white px-6 py-4">
@@ -248,3 +254,4 @@ export default function EmployeeForm({
     </div>
   );
 }
+

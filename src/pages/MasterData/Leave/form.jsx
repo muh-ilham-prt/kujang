@@ -1,4 +1,9 @@
 import { useEffect, useState } from "react";
+import MultiSelect from "../../../components/MultiSelect";
+import useSession, {
+  isSuperuser,
+  useEntities,
+} from "../../../hooks/useSession";
 import { useEmployees } from "../Employee";
 import { useLeaveTypes } from "./components/type-list";
 import { LEAVE_STATUSES, inputClass, labelClass } from "./constants";
@@ -10,6 +15,7 @@ const EMPTY = {
   hal_request_dateto: "",
   hal_request_desc: "",
   hal_request_sts: "Open",
+  entities: [],
 };
 
 // End date is inclusive, so a same-day leave counts as 1 day.
@@ -23,9 +29,14 @@ export default function LeaveForm({ show, onClose, onSubmit, initialData }) {
   const [formData, setFormData] = useState(EMPTY);
   const [error, setError] = useState(null);
   // Both lists are entity-scoped, so they follow the session automatically.
-  // No Entity picker here — a leave inherits its scope from the chosen employee.
+  // The selected employee pre-fills the scope; it can be edited afterwards.
   const employees = useEmployees();
   const leaveTypes = useLeaveTypes();
+  const [session] = useSession();
+  const { entityOptions } = useEntities();
+  // Entity scope is only meaningful to a superuser or an account spanning several entities
+  const canAssignEntities =
+    isSuperuser(session) || (session?.entities?.length || 0) > 1;
 
   useEffect(() => {
     setFormData(initialData ? { ...EMPTY, ...initialData } : EMPTY);
@@ -36,6 +47,16 @@ export default function LeaveForm({ show, onClose, onSubmit, initialData }) {
 
   const field = (name, value) => setFormData({ ...formData, [name]: value });
   const days = countDays(formData.hal_request_datefr, formData.hal_request_dateto);
+
+  // Selecting an employee pulls its scope into the form so the picker starts pre-filled
+  const changeEmployee = (nip) => {
+    const chosen = employees.find((e) => e.value === nip);
+    setFormData({
+      ...formData,
+      hal_empy_nip: nip,
+      entities: chosen?.entities?.length ? chosen.entities : formData.entities,
+    });
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -63,6 +84,19 @@ export default function LeaveForm({ show, onClose, onSubmit, initialData }) {
 
         <form onSubmit={handleSubmit}>
           <div className="space-y-4 px-6 py-4">
+            {canAssignEntities && (
+              <div>
+                <span className={labelClass}>Entity</span>
+                <MultiSelect
+                  id="leave-entities"
+                  options={entityOptions}
+                  value={formData.entities || []}
+                  onChange={(value) => field("entities", value)}
+                  placeholder="Pilih Entity"
+                />
+              </div>
+            )}
+
             {error && (
               <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800">
                 {error}
@@ -77,7 +111,7 @@ export default function LeaveForm({ show, onClose, onSubmit, initialData }) {
                 <select autoComplete="off"
                   id="hal_empy_nip"
                   value={formData.hal_empy_nip}
-                  onChange={(e) => field("hal_empy_nip", e.target.value)}
+                  onChange={(e) => changeEmployee(e.target.value)}
                   required
                   className={inputClass}
                 >

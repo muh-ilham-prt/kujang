@@ -8,7 +8,7 @@ import { useClients } from "../../MasterData/Client";
 const distinctColors = (n) =>
   Array.from({ length: n }, (_, i) => `hsl(${(i * 360) / n}, 70%, 50%)`);
 
-export default function ChartEmployeePerCustomer() {
+export default function ChartEmployeePerCustomer({ entityId }) {
   const [employees] = useLocalState("employees", []);
   const [session] = useSession();
   const clientOptions = useClients();
@@ -18,7 +18,12 @@ export default function ChartEmployeePerCustomer() {
 
   const counts = {};
   employees
-    .filter((e) => inScope(session, e))
+    .filter(
+      (e) =>
+        inScope(session, e) &&
+        // A per-entity block only counts employees carrying that entity
+        (!entityId || (e.entities || []).includes(entityId))
+    )
     .forEach((e) => {
       const name = clientName(e.mem_customer_id);
       counts[name] = (counts[name] || 0) + 1;

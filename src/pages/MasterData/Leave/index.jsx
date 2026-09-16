@@ -84,11 +84,12 @@ export default function Leave() {
         ...prev,
         {
           ...data,
-          // A leave belongs where its employee does; fall back to the creator's scope
-          entities: optionOf(employeeOptions, data.hal_empy_nip)?.entities
-            ?.length
-            ? optionOf(employeeOptions, data.hal_empy_nip).entities
-            : session?.entities || [],
+          // The picker wins when filled; otherwise the leave follows its employee
+          entities: data.entities?.length
+            ? data.entities
+            : optionOf(employeeOptions, data.hal_empy_nip)?.entities?.length
+              ? optionOf(employeeOptions, data.hal_empy_nip).entities
+              : session?.entities || [],
           hal_leave_id: Date.now(),
         },
       ]);

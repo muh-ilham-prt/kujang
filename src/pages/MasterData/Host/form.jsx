@@ -61,6 +61,19 @@ export default function HostForm({ show, onClose, onSubmit, initialData }) {
 
         <form onSubmit={handleSubmit}>
           <div className="space-y-4 px-6 py-4">
+            {canAssignEntities && (
+              <div>
+                <span className={labelClass}>Entity</span>
+                <MultiSelect
+                  id="host-entities"
+                  options={entityOptions}
+                  value={formData.entities || []}
+                  onChange={(value) => field("entities", value)}
+                  placeholder="Pilih Entity"
+                />
+              </div>
+            )}
+
             <div>
               <label htmlFor="mcr_customer" className={labelClass}>
                 Klien
@@ -80,19 +93,6 @@ export default function HostForm({ show, onClose, onSubmit, initialData }) {
                 ))}
               </select>
             </div>
-
-            {canAssignEntities && (
-              <div>
-                <span className={labelClass}>Entity</span>
-                <MultiSelect
-                  id="host-entities"
-                  options={entityOptions}
-                  value={formData.entities || []}
-                  onChange={(value) => field("entities", value)}
-                  placeholder="Pilih Entity"
-                />
-              </div>
-            )}
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>

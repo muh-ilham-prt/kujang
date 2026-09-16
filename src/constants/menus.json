@@ -13,12 +13,12 @@
     "label": "User Manajemen",
     "icon": "fa6-solid:users-gear",
     "children": [
-      { "label": "Semua User", "path": "/user", "icon": "fa6-solid:users" },
       {
         "label": "Role",
         "path": "/user/role",
         "icon": "fa6-solid:user-shield"
-      }
+      },
+      { "label": "Semua User", "path": "/user", "icon": "fa6-solid:users" }
     ]
   },
   {

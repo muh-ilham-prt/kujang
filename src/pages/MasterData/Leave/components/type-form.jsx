@@ -59,6 +59,19 @@ export default function LeaveTypeForm({ show, onClose, onSubmit, initialData }) 
 
         <form onSubmit={handleSubmit}>
           <div className="space-y-4 px-6 py-4">
+            {canAssignEntities && (
+              <div>
+                <span className={labelClass}>Entity</span>
+                <MultiSelect
+                  id="leavetype-entities"
+                  options={entityOptions}
+                  value={formData.entities || []}
+                  onChange={(value) => field("entities", value)}
+                  placeholder="Pilih Entity"
+                />
+              </div>
+            )}
+
             <div>
               <label htmlFor="meat_abs_type_name" className={labelClass}>
                 Nama Jenis Cuti
@@ -126,19 +139,7 @@ export default function LeaveTypeForm({ show, onClose, onSubmit, initialData }) 
               </div>
             </div>
 
-            {canAssignEntities && (
-              <div>
-                <span className={labelClass}>Entity</span>
-                <MultiSelect
-                  id="leavetype-entities"
-                  options={entityOptions}
-                  value={formData.entities || []}
-                  onChange={(value) => field("entities", value)}
-                  placeholder="Pilih Entity"
-                />
-              </div>
-            )}
-          </div>
+            </div>
 
           <div className="sticky bottom-0 flex justify-end gap-2 border-t border-slate-200 bg-white px-6 py-4">
             <button
