@@ -10,17 +10,12 @@ import useSession, {
   useEntities,
 } from "../../../hooks/useSession";
 import { useClients } from "../Client";
+import { useShiftTypes } from "../ShiftType";
 import WorkShiftForm from "./form";
 
 const PER_PAGE = 10;
 // matches the menu path in constants/menus.json
 const PERM_PATH = "/master/work-shift";
-
-// ponytail: mirrors the form's static options — both come from the API later
-const SHIFT_TYPES = [
-  { value: "1", label: "Reguler" },
-  { value: "2", label: "Shift" },
-];
 
 // clients holds the selected ids; empty means no client filter
 const EMPTY_FILTERS = { clients: [], type: "", name: "" };
@@ -50,6 +45,7 @@ export default function WorkShift() {
   const canDelete = can(session, PERM_PATH, "delete");
   const { entityNames } = useEntities();
   const clientOptions = useClients();
+  const shiftTypeOptions = useShiftTypes();
   // Entity scope is only meaningful to a superuser or an account spanning several entities
   const canSeeEntities =
     isSuperuser(session) || (session?.entities?.length || 0) > 1;
@@ -173,7 +169,7 @@ export default function WorkShift() {
               className={filterInputClass}
             >
               <option value="">Semua Tipe Jam Kerja</option>
-              {SHIFT_TYPES.map((t) => (
+              {shiftTypeOptions.map((t) => (
                 <option key={t.value} value={t.value}>
                   {t.label}
                 </option>
@@ -248,7 +244,7 @@ export default function WorkShift() {
                   {shift.gwh_work_name || "-"}
                 </td>
                 <td className="whitespace-nowrap px-6 py-3">
-                  {labelOf(SHIFT_TYPES, shift.gwh_whtype)}
+                  {labelOf(shiftTypeOptions, shift.gwh_whtype)}
                 </td>
                 <td className="whitespace-nowrap px-6 py-3">
                   {labelOf(clientOptions, shift.gwh_customer)}
@@ -322,6 +318,7 @@ export default function WorkShift() {
         onSubmit={handleSubmit}
         initialData={editing}
         workShifts={shifts}
+        shiftTypes={shiftTypeOptions}
       />
 
       {toDelete && (

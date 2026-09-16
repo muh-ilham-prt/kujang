@@ -15,14 +15,6 @@ export const slugify = (name) =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
 
-// ponytail: static options — swap for fetchLocationTypes/fetchClients when the API lands
-const LOCATION_TYPES = [
-  { value: "1", label: "POS JAGA" },
-  { value: "2", label: "CHECKPOINT" },
-  { value: "3", label: "WAREHOUSE" },
-  { value: "4", label: "COUNTER" },
-];
-
 // Bandung — fallback center when the form has no coordinates yet
 const DEFAULT_CENTER = [-6.914722, 107.618611];
 
@@ -61,7 +53,7 @@ function Recenter({ position }) {
   return null;
 }
 
-export default function LocationForm({ show, onClose, onSubmit, initialData, locations = [] }) {
+export default function LocationForm({ show, onClose, onSubmit, initialData, locations = [], locationTypes = [] }) {
   const [formData, setFormData] = useState(EMPTY);
   const [error, setError] = useState(null);
   const [session] = useSession();
@@ -169,7 +161,7 @@ export default function LocationForm({ show, onClose, onSubmit, initialData, loc
                   className={inputClass}
                 >
                   <option value="">Pilih Jenis Lokasi</option>
-                  {LOCATION_TYPES.map((t) => (
+                  {locationTypes.map((t) => (
                     <option key={t.value} value={t.value}>
                       {t.label}
                     </option>

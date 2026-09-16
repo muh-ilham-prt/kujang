@@ -11,12 +11,7 @@ import {
 } from "react-leaflet";
 import MultiSelect from "../../../components/MultiSelect";
 import useSession, { isSuperuser, useEntities } from "../../../hooks/useSession";
-
-// ponytail: static options — swap for fetchClientGroups when the API lands
-const CLIENT_GROUPS = [
-  { value: "1", label: "Grup Retail" },
-  { value: "2", label: "Grup Industri" },
-];
+import { useClientGroups } from "../ClientGroup";
 
 // Bandung — fallback center when the form has no coordinates yet
 const DEFAULT_CENTER = [-6.914722, 107.618611];
@@ -82,6 +77,7 @@ export default function ClientForm({
   const [error, setError] = useState(null);
   const [session] = useSession();
   const { entityOptions } = useEntities();
+  const clientGroups = useClientGroups();
   // Entity scope is only meaningful to a superuser or an account spanning several entities
   const canAssignEntities =
     isSuperuser(session) || (session?.entities?.length || 0) > 1;
@@ -221,7 +217,7 @@ export default function ClientForm({
                   className={inputClass}
                 >
                   <option value="">Pilih Grup</option>
-                  {CLIENT_GROUPS.map((g) => (
+                  {clientGroups.map((g) => (
                     <option key={g.value} value={g.value}>
                       {g.label}
                     </option>

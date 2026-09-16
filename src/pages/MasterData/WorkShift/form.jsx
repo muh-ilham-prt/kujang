@@ -12,12 +12,6 @@ export const slugify = (name) =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
 
-// ponytail: static options — swap for fetchWorkHourTypes when the API lands
-const SHIFT_TYPES = [
-  { value: "1", label: "Reguler" },
-  { value: "2", label: "Shift" },
-];
-
 const DAYS = [
   { label: "Senin", key: "mon" },
   { label: "Selasa", key: "tue" },
@@ -60,6 +54,7 @@ export default function WorkShiftForm({
   onSubmit,
   initialData,
   workShifts = [],
+  shiftTypes = [],
 }) {
   const [formData, setFormData] = useState(EMPTY);
   const [error, setError] = useState(null);
@@ -172,7 +167,7 @@ export default function WorkShiftForm({
                 className={inputClass}
               >
                 <option value="">Pilih Tipe Jam Kerja</option>
-                {SHIFT_TYPES.map((t) => (
+                {shiftTypes.map((t) => (
                   <option key={t.value} value={t.value}>
                     {t.label}
                   </option>

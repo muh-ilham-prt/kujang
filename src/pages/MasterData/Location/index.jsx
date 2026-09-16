@@ -11,19 +11,13 @@ import useSession, {
   useEntities,
 } from "../../../hooks/useSession";
 import { useClients } from "../Client";
+import { useLocationTypes } from "../LocationType";
 import LocationForm from "./form";
 
 const PER_PAGE = 10;
 // matches the menu path in constants/menus.json
 const PERM_PATH = "/master/location";
 
-// ponytail: mirrors the form's static options — both come from the API later
-const LOCATION_TYPES = [
-  { value: "1", label: "POS JAGA" },
-  { value: "2", label: "CHECKPOINT" },
-  { value: "3", label: "WAREHOUSE" },
-  { value: "4", label: "COUNTER" },
-];
 const labelOf = (options, value) =>
   options.find((o) => o.value === String(value))?.label || "-";
 
@@ -59,6 +53,7 @@ export default function Location() {
   const canDelete = can(session, PERM_PATH, "delete");
   const { entityNames } = useEntities();
   const clientOptions = useClients();
+  const locationTypeOptions = useLocationTypes();
   // Entity scope is only meaningful to a superuser or an account spanning several entities
   const canSeeEntities =
     isSuperuser(session) || (session?.entities?.length || 0) > 1;
@@ -209,7 +204,7 @@ export default function Location() {
               className={filterInputClass}
             >
               <option value="">Semua Jenis Lokasi</option>
-              {LOCATION_TYPES.map((t) => (
+              {locationTypeOptions.map((t) => (
                 <option key={t.value} value={t.value}>
                   {t.label}
                 </option>
@@ -282,7 +277,7 @@ export default function Location() {
                 <td className="px-6 py-3">{loc.mlm_loc_name}</td>
                 <td className="px-6 py-3">{loc.mlm_loc_short}</td>
                 <td className="px-6 py-3">
-                  {labelOf(LOCATION_TYPES, loc.mlm_loc_type)}
+                  {labelOf(locationTypeOptions, loc.mlm_loc_type)}
                 </td>
                 <td className="px-6 py-3">
                   {labelOf(clientOptions, loc.mlm_customer)}
@@ -380,6 +375,7 @@ export default function Location() {
         onSubmit={handleSubmit}
         initialData={editing}
         locations={locations}
+        locationTypes={locationTypeOptions}
       />
 
       {qrLocation && (
