@@ -29,6 +29,9 @@ export const inScope = (session, item) => {
 // Entity column + multi-select need the same two things in every scoped module.
 export const useEntities = () => {
   const [entities] = useLocalState("entities", []);
+  const [session] = useSession();
+  // A single-entity account never needs the entity badge/column to disambiguate anything
+  const showEntities = isSuperuser(session) || (session?.entities?.length || 0) > 1;
   return {
     entityOptions: entities.map((entity) => ({
       value: String(entity.id),
@@ -40,11 +43,13 @@ export const useEntities = () => {
         .filter(Boolean)
         .join(", ") || "-",
     entityShortNames: (ids = []) =>
-      ids
-        .map(
-          (id) => entities.find((e) => String(e.id) === String(id))?.shortName,
-        )
-        .filter(Boolean)
-        .join(", ") || "-",
+      showEntities
+        ? ids
+            .map(
+              (id) => entities.find((e) => String(e.id) === String(id))?.shortName,
+            )
+            .filter(Boolean)
+            .join(", ") || "-"
+        : "",
   };
 };

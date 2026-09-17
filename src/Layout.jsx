@@ -8,11 +8,14 @@ export default function Layout() {
 
   return (
     <>
-      <Navbar toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+      <Navbar
+        toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+        isSidebarOpen={isSidebarOpen}
+      />
       <Sidebar isOpen={isSidebarOpen} />
       <main
         className={`mt-20 p-2 transition-all duration-300 ease-in-out ${
-          isSidebarOpen ? "lg:ml-56" : "ml-0"
+          isSidebarOpen ? "lg:ml-60" : "ml-0"
         }`}
       >
         <Outlet />

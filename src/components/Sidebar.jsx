@@ -1,20 +1,20 @@
 import { Icon } from "@iconify/react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import logo from "../assets/logo.png";
 import menus from "../constants/menus.json";
 import useSession, { can } from "../hooks/useSession";
 
 const rowClass = (isActive) =>
-  `relative flex justify-between items-center px-4 py-[12px] text-base rounded-md cursor-pointer overflow-hidden
-   transition-all duration-500 ease-in-out
+  `group relative flex items-center justify-between gap-2 rounded-xl px-3 py-2.5 text-sm cursor-pointer
+   transition-all duration-200
    ${
      isActive
-       ? "bg-primary/80 text-white shadow-sm rounded-xl"
-       : "text-slate-700 hover:text-primary rounded-xl"
+       ? "bg-linear-to-r from-primary to-purple-600 text-white shadow-md shadow-primary/30"
+       : "text-slate-600 hover:bg-primary/8 hover:text-primary"
    }
-   before:absolute before:inset-0 before:bg-primary/20
-   before:translate-x-[-101%] hover:before:translate-x-0
-   before:transition-all before:duration-300 before:ease-in-out`;
+   before:absolute before:left-0 before:top-1/2 before:h-5 before:w-1 before:-translate-y-1/2 before:rounded-r-full
+   before:bg-white/80 before:transition-opacity ${isActive ? "before:opacity-100" : "before:opacity-0"}`;
 
 function MenuItem({ menu, canRead }) {
   const { pathname } = useLocation();
@@ -27,47 +27,39 @@ function MenuItem({ menu, canRead }) {
   return (
     <li>
       {hasChild ? (
-        <div
-          className={rowClass(isActive).replace("py-[12px]", "py-[10px]")}
-          onClick={() => setExpanded(!expanded)}
-        >
-          <div className="flex-1 flex items-center">
+        <div className={rowClass(isActive)} onClick={() => setExpanded(!expanded)}>
+          <div className="flex flex-1 items-center gap-3">
             {menu.icon && (
               <Icon
                 icon={menu.icon}
-                className={`w-4 h-4 shrink-0 ${
+                className={`size-4 shrink-0 transition-transform group-hover:scale-110 ${
                   isActive ? "text-white" : "text-primary"
                 }`}
               />
             )}
-            <span className="ml-3 flex-1">{menu.label}</span>
+            <span className="flex-1 font-medium">{menu.label}</span>
           </div>
-          <div className="-m-px">
-            <Icon
-              icon="fa6-solid:chevron-down"
-              className={`w-4 h-4 transition-transform ${
-                expanded ? "rotate-180" : ""
-              }`}
-            />
-          </div>
+          <Icon
+            icon="fa6-solid:chevron-down"
+            className={`size-3 shrink-0 transition-transform duration-300 ${
+              expanded ? "rotate-180" : ""
+            }`}
+          />
         </div>
       ) : (
         <Link to={menu.path} className="block" replace>
           <div className={rowClass(isActive)}>
-            <div className="flex-1 flex items-center">
+            <div className="flex flex-1 items-center gap-3">
               {menu.icon && (
                 <Icon
                   icon={menu.icon}
-                  className={`w-3 h-3 shrink-0 ${
+                  className={`size-3.5 shrink-0 transition-transform group-hover:scale-110 ${
                     isActive ? "text-white" : "text-primary"
                   }`}
                 />
               )}
-              <span className="ml-3 flex-1">{menu.label}</span>
+              <span className="flex-1">{menu.label}</span>
             </div>
-            {isActive && (
-              <div className="lg:hidden w-1.5 h-1.5 rounded-full bg-white mr-1" />
-            )}
           </div>
         </Link>
       )}
@@ -80,7 +72,7 @@ function MenuItem({ menu, canRead }) {
             expanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
           }`}
         >
-          <ul className="ml-6 space-y-[2px] overflow-hidden">
+          <ul className="ml-5 space-y-0.5 overflow-hidden border-l border-slate-200 pl-2">
             {menu.children
               .filter((child) => canRead(child.path))
               .map((child) => (
@@ -99,12 +91,25 @@ export default function Sidebar({ isOpen = true }) {
   return (
     <div
       className={`fixed top-0 bottom-0 left-0 right-0 lg:right-auto
-        h-full w-full lg:w-56 bg-white
+        h-full w-full lg:w-60 border-r border-slate-200 bg-white lg:z-60
         transform ${isOpen ? "translate-x-0" : "-translate-x-full"}
-        transition-all duration-500 ease-in-out z-10`}
+        transition-transform duration-300 ease-in-out z-10`}
     >
-      {/* mt-20 clears the navbar, so the scroll area is the rest of the viewport */}
-      <div className="overflow-y-auto px-2 pb-4 h-[calc(100%-5rem)] mt-20 scrollsidebarClass">
+      {/* Brand header — desktop only; on mobile the sidebar sits under the navbar */}
+      <Link
+        to="/dashboard"
+        className="hidden h-[3.75rem] items-center gap-2 border-b border-slate-200 px-4 lg:flex"
+      >
+        <img src={logo} alt="Logo" className="size-9 shrink-0 object-contain" />
+        <span className="truncate text-sm font-semibold text-slate-800">
+          Kujang
+        </span>
+      </Link>
+
+      <div className="scrollsidebarClass mt-20 h-[calc(100%-5rem)] overflow-y-auto px-3 py-4 lg:mt-0 lg:h-[calc(100%-3.75rem)]">
+        <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+          Menu
+        </p>
         <ul className="space-y-1">
           {menus
             .filter((menu) =>

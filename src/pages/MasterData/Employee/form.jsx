@@ -212,22 +212,6 @@ export default function EmployeeForm({
             </div>
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div>
-                <label htmlFor="mem_empy_upper" className={labelClass}>
-                  Atasan
-                </label>
-                <Dropdown
-                  id="mem_empy_upper"
-                  options={supervisors.map((e) => ({
-                    value: e.mem_empy_nip,
-                    label: e.mem_empy_name,
-                  }))}
-                  value={formData.mem_empy_upper}
-                  onChange={(value) => field("mem_empy_upper", value)}
-                  placeholder="Pilih Atasan"
-                />
-              </div>
-
               {selects.map(([name, label, options, placeholder]) => (
                 <div key={name}>
                   <label htmlFor={name} className={labelClass}>
@@ -243,6 +227,22 @@ export default function EmployeeForm({
                   />
                 </div>
               ))}
+
+              <div>
+                <label htmlFor="mem_empy_upper" className={labelClass}>
+                  Atasan
+                </label>
+                <Dropdown
+                  id="mem_empy_upper"
+                  options={supervisors.map((e) => ({
+                    value: e.mem_empy_nip,
+                    label: e.mem_empy_name,
+                  }))}
+                  value={formData.mem_empy_upper}
+                  onChange={(value) => field("mem_empy_upper", value)}
+                  placeholder="Pilih Atasan"
+                />
+              </div>
             </div>
           </div>
 

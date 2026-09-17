@@ -33,6 +33,34 @@ body {
 	border-radius: 10px;
 }
 
+@keyframes card-in {
+	from { opacity: 0; transform: translateY(16px) scale(0.98); }
+	to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes shake {
+	10%, 90% { transform: translateX(-1px); }
+	20%, 80% { transform: translateX(2px); }
+	30%, 50%, 70% { transform: translateX(-4px); }
+	40%, 60% { transform: translateX(4px); }
+}
+
+/* Slow drifting blobs behind the login card — pure CSS, no JS cost. */
+@keyframes blob {
+	0%, 100% { transform: translate(0, 0) scale(1); }
+	33% { transform: translate(30px, -40px) scale(1.1); }
+	66% { transform: translate(-20px, 20px) scale(0.95); }
+}
+.animate-blob {
+	animation: blob 10s infinite ease-in-out;
+}
+.animation-delay-2000 {
+	animation-delay: 2s;
+}
+.animation-delay-4000 {
+	animation-delay: 4s;
+}
+
 /* Tooltip: any element with data-tooltip shows its text on hover/focus. */
 [data-tooltip] {
 	position: relative;

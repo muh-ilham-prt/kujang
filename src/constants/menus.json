@@ -66,24 +66,9 @@
         "icon": "fa6-solid:location-dot"
       },
       {
-        "label": "Pegawai",
+        "label": "Karyawan",
         "path": "/master/employee",
         "icon": "fa6-solid:id-badge"
-      },
-      {
-        "label": "Penerima Tamu",
-        "path": "/master/host",
-        "icon": "fa6-solid:user-tie"
-      },
-      {
-        "label": "Jenis Tamu",
-        "path": "/master/guest-type",
-        "icon": "fa6-solid:user-tag"
-      },
-      {
-        "label": "Tamu",
-        "path": "/master/guest",
-        "icon": "fa6-solid:user-check"
       },
       {
         "label": "Cuti & Jenis Cuti",

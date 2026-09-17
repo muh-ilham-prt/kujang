@@ -48,130 +48,129 @@ export default function Login() {
     }
   };
 
+  const fieldClass =
+    "w-full rounded-lg border border-slate-300 py-2 pl-9 text-sm text-slate-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20";
+
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
-      <div className="w-full max-w-6xl overflow-hidden rounded-3xl bg-white shadow p-6">
-        <div className="flex flex-col lg:flex-row">
-          {/* Left side - Login Form */}
-          <div className="w-full lg:w-7/12 p-8 lg:p-12">
-            <div className="max-w-xl mx-auto">
-              <div className="text-center mb-5">
-                <img
-                  src={logo}
-                  alt="Logo"
-                  width={96}
-                  height={96}
-                  className="mx-auto mb-6 size-24"
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-950 px-4">
+      {/* Decorative backdrop: drifting glow + faint grid */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -left-20 -top-20 size-80 animate-blob rounded-full bg-primary/40 blur-3xl" />
+        <div className="absolute -bottom-20 -right-20 size-80 animate-blob animation-delay-2000 rounded-full bg-purple-600/30 blur-3xl" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px),linear-gradient(to_bottom,#ffffff0a_1px,transparent_1px)] bg-[size:36px_36px]" />
+      </div>
+
+      <div className="relative w-full max-w-sm animate-[card-in_0.4s_ease-out] overflow-hidden rounded-2xl border border-white/15 bg-white/95 shadow-2xl shadow-primary/20 backdrop-blur-xl">
+        <div className="h-1 bg-linear-to-r from-primary via-purple-500 to-cyan-400" />
+        <div className="p-6">
+        <div className="mb-5 text-center">
+          <img
+            src={logo}
+            alt="Logo"
+            className="mx-auto mb-3 size-14 drop-shadow transition-transform duration-300 hover:scale-110"
+          />
+          <h1 className="text-lg font-semibold text-slate-900">Kujang Dashboard</h1>
+          <p className="text-xs text-slate-500">Masuk ke akun Anda</p>
+        </div>
+
+        <form onSubmit={handleLogin} className="flex flex-col gap-3">
+          <div className="group relative">
+            <Icon
+              icon="fa6-solid:user"
+              className="absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-primary"
+            />
+            <input
+              autoComplete="off"
+              id="user-id"
+              type="text"
+              aria-label="User ID"
+              placeholder="User ID"
+              value={userId}
+              onChange={(e) => setUserId(e.target.value)}
+              required
+              className={fieldClass}
+            />
+          </div>
+
+          <div className="group relative">
+            <Icon
+              icon="fa6-solid:lock"
+              className="absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-primary"
+            />
+            <input
+              autoComplete="off"
+              id="password"
+              type={showPassword ? "text" : "password"}
+              aria-label="Password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className={`${fieldClass} pr-9`}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-primary"
+              aria-label={
+                showPassword ? "Sembunyikan password" : "Tampilkan password"
+              }
+              tabIndex={-1}
+            >
+              <Icon
+                icon={showPassword ? "fa6-solid:eye-slash" : "fa6-solid:eye"}
+                className="size-3.5"
+              />
+            </button>
+          </div>
+
+          {error && (
+            <div
+              role="alert"
+              className="flex animate-[shake_0.4s] items-center gap-2 rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700"
+            >
+              <Icon
+                icon="fa6-solid:circle-exclamation"
+                className="size-3.5 shrink-0"
+              />
+              {error}
+            </div>
+          )}
+
+          <label
+            htmlFor="remember"
+            className="flex items-center gap-2 text-xs text-slate-600"
+          >
+            <input
+              autoComplete="off"
+              id="remember"
+              type="checkbox"
+              className="size-3.5 accent-primary"
+            />
+            Ingat Saya
+          </label>
+
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="group flex w-full items-center justify-center gap-2 rounded-lg bg-linear-to-r from-primary to-purple-600 px-4 py-2 text-sm font-medium text-white shadow-md shadow-primary/30 transition hover:shadow-lg hover:shadow-primary/40 hover:brightness-110 active:scale-[0.98] disabled:opacity-60"
+          >
+            {isLoading ? (
+              <>
+                <Icon icon="fa6-solid:spinner" className="size-3.5 animate-spin" />
+                Memproses...
+              </>
+            ) : (
+              <>
+                Masuk
+                <Icon
+                  icon="fa6-solid:arrow-right"
+                  className="size-3 transition-transform group-hover:translate-x-1"
                 />
-                <h1 className="text-2xl font-bold text-gray-900">
-                  Masuk ke akun Anda
-                </h1>
-              </div>
-
-              <form onSubmit={handleLogin} className="flex flex-col gap-3">
-                <div>
-                  <label
-                    htmlFor="user-id"
-                    className="mb-2 block text-base font-medium text-gray-900"
-                  >
-                    User ID
-                  </label>
-                  <div className="relative">
-                    <Icon
-                      icon="fa6-solid:user"
-                      className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-500"
-                    />
-                    <input autoComplete="off"
-                      id="user-id"
-                      type="text"
-                      placeholder="Masukkan User ID Anda"
-                      value={userId}
-                      onChange={(e) => setUserId(e.target.value)}
-                      required
-                      className="w-full rounded-lg border border-gray-300 p-2.5 pl-10 text-gray-900"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="password"
-                    className="mb-2 block text-base font-medium text-gray-900"
-                  >
-                    Password
-                  </label>
-                  <div className="relative">
-                    <Icon
-                      icon="fa6-solid:lock"
-                      className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-500"
-                    />
-                    <input autoComplete="off"
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Masukkan Password Anda"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      className="w-full rounded-lg border border-gray-300 p-2.5 pl-10 pr-10 text-gray-900"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                      aria-label={
-                        showPassword
-                          ? "Sembunyikan password"
-                          : "Tampilkan password"
-                      }
-                      tabIndex={-1}
-                    >
-                      <Icon
-                        icon={
-                          showPassword ? "fa6-solid:eye-slash" : "fa6-solid:eye"
-                        }
-                        className="size-4"
-                      />
-                    </button>
-                  </div>
-                </div>
-
-                {error && (
-                  <div
-                    role="alert"
-                    className="rounded-lg bg-red-100 p-3 text-sm text-red-700"
-                  >
-                    {error}
-                  </div>
-                )}
-
-                <div className="flex items-center gap-2">
-                  <input autoComplete="off" id="remember" type="checkbox" className="size-4" />
-                  <label htmlFor="remember" className="text-base text-gray-900">
-                    Ingat Saya
-                  </label>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full rounded-lg bg-linear-to-br from-purple-600 to-blue-500 px-5 py-3 text-white disabled:opacity-60"
-                >
-                  {isLoading ? "Memproses..." : "Masuk"}
-                </button>
-              </form>
-            </div>
-          </div>
-
-          {/* Right side - Welcome Banner */}
-          <div className="w-full lg:w-4/6 hidden lg:flex bg-linear-to-br from-blue-600 to-blue-800 items-center justify-center lg:-mr-6 lg:-my-6 rounded-tl-[30px] rounded-tr-[180px] rounded-br-[30px] rounded-bl-[180px] py-16 lg:py-0 border-x-8 border-x-slate-200">
-            <div className="text-center text-white px-8 lg:px-12">
-              <p className="text-lg lg:text-xl mb-4 opacity-90">
-                Selamat datang,
-              </p>
-              <h2 className="text-3xl lg:text-4xl font-bold mb-6">Kujang</h2>
-              <p className="text-lg lg:text-xl">Kujang Dashboard</p>
-            </div>
-          </div>
+              </>
+            )}
+          </button>
+        </form>
         </div>
       </div>
     </div>
