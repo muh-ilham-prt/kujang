@@ -1,5 +1,6 @@
 import { Icon } from "@iconify/react";
 import { useState } from "react";
+import Dropdown from "../../../components/Dropdown";
 import Pagination from "../../../components/Pagination";
 import useLocalState from "../../../hooks/useLocalState";
 import useSession, {
@@ -178,20 +179,13 @@ export default function Leave() {
                 onChange={(e) => setFilter("search", e.target.value)}
                 className={filterInputClass}
               />
-              <select
-                autoComplete="off"
-                aria-label="Filter Status"
+              <Dropdown
+                id="filter-status"
+                options={[{ value: "", label: "Semua Status" }, ...LEAVE_STATUSES]}
                 value={filters.status}
-                onChange={(e) => setFilter("status", e.target.value)}
-                className={`${filterInputClass} w-52`}
-              >
-                <option value="">Semua Status</option>
-                {LEAVE_STATUSES.map((s) => (
-                  <option key={s.value} value={s.value}>
-                    {s.label}
-                  </option>
-                ))}
-              </select>
+                onChange={(value) => setFilter("status", value)}
+                className="w-52"
+              />
             </div>
           </div>
 

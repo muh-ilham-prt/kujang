@@ -1,6 +1,7 @@
 import { Icon } from "@iconify/react";
 import { useState } from "react";
 import QRCode from "react-qr-code";
+import Dropdown from "../../../components/Dropdown";
 import MultiSelect from "../../../components/MultiSelect";
 import Pagination from "../../../components/Pagination";
 import useLocalState from "../../../hooks/useLocalState";
@@ -18,8 +19,11 @@ const PER_PAGE = 10;
 // matches the menu path in constants/menus.json
 const PERM_PATH = "/master/location";
 
-const labelOf = (options, value) =>
-  options.find((o) => o.value === String(value))?.label || "-";
+const labelOf = (options, value) => {
+  const option = options.find((o) => o.value === String(value));
+  if (!option) return "-";
+  return option.badge ? `${option.label} [${option.badge}]` : option.label;
+};
 
 // The payload the guard's mobile app scans at check-in.
 const qrData = (loc) =>
@@ -51,9 +55,16 @@ export default function Location() {
   const canCreate = can(session, PERM_PATH, "create");
   const canUpdate = can(session, PERM_PATH, "update");
   const canDelete = can(session, PERM_PATH, "delete");
-  const { entityNames } = useEntities();
-  const clientOptions = useClients();
-  const locationTypeOptions = useLocationTypes();
+  const { entityNames, entityShortNames } = useEntities();
+  // Badge carries the entity so options spanning several entities aren't ambiguous in the dropdown
+  const clientOptions = useClients().map((c) => ({
+    ...c,
+    badge: entityShortNames(c.entities),
+  }));
+  const locationTypeOptions = useLocationTypes().map((t) => ({
+    ...t,
+    badge: entityShortNames(t.entities),
+  }));
   // Entity scope is only meaningful to a superuser or an account spanning several entities
   const canSeeEntities =
     isSuperuser(session) || (session?.entities?.length || 0) > 1;
@@ -196,20 +207,16 @@ export default function Location() {
             >
               Jenis Lokasi
             </label>
-            <select
-              autoComplete="off"
+            <Dropdown
               id="filter-type"
+              options={[
+                { value: "", label: "Semua Jenis Lokasi" },
+                ...locationTypeOptions,
+              ]}
               value={filters.type}
-              onChange={(e) => setFilter("type", e.target.value)}
-              className={filterInputClass}
-            >
-              <option value="">Semua Jenis Lokasi</option>
-              {locationTypeOptions.map((t) => (
-                <option key={t.value} value={t.value}>
-                  {t.label}
-                </option>
-              ))}
-            </select>
+              onChange={(value) => setFilter("type", value)}
+              className="w-full"
+            />
           </div>
 
           <div>

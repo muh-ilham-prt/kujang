@@ -21,6 +21,7 @@ export const useLeaveTypes = () => {
     .map((type) => ({
       value: String(type.meat_abs_type),
       label: type.meat_abs_type_name,
+      entities: type.entities || [],
     }));
 };
 

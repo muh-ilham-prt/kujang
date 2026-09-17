@@ -23,6 +23,7 @@ export const usePositions = () => {
     .map((position) => ({
       value: String(position.mep_empy_position_id),
       label: position.mep_empy_position_name,
+      entities: position.entities || [],
     }));
 };
 

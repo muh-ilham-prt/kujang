@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import Dropdown from "../../../components/Dropdown";
 import menus from "../../../constants/menus.json";
 import useLocalState from "../../../hooks/useLocalState";
 import { SEED as ROLE_SEED, ensureSuperuser } from "../role";
@@ -105,16 +106,12 @@ export default function PermissionPage() {
             <label htmlFor="permission-role" className="text-sm font-medium text-slate-700">
               Role
             </label>
-            <select autoComplete="off"
+            <Dropdown
               id="permission-role"
+              options={roles.map((item) => ({ value: item.name, label: item.name }))}
               value={role}
-              onChange={(e) => changeRole(e.target.value)}
-              className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 focus:outline-none"
-            >
-              {roles.map((item) => (
-                <option key={item.id} value={item.name}>{item.name}</option>
-              ))}
-            </select>
+              onChange={changeRole}
+            />
           </div>
         )}
       </div>

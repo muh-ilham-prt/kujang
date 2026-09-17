@@ -23,6 +23,7 @@ export const useLevels = () => {
     .map((level) => ({
       value: String(level.mel_empy_level_id),
       label: level.mel_empy_level_name,
+      entities: level.entities || [],
     }));
 };
 

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import Dropdown from "../../../components/Dropdown";
 import MultiSelect from "../../../components/MultiSelect";
 import useSession, {
   isSuperuser,
@@ -38,12 +39,19 @@ export default function LeaveForm({
 }) {
   const [formData, setFormData] = useState(EMPTY);
   const [error, setError] = useState(null);
+  const [session] = useSession();
+  const { entityOptions, entityShortNames } = useEntities();
   // Both lists are entity-scoped, so they follow the session automatically.
   // The selected employee pre-fills the scope; it can be edited afterwards.
-  const employees = useEmployees();
-  const leaveTypes = useLeaveTypes();
-  const [session] = useSession();
-  const { entityOptions } = useEntities();
+  // Badge carries the entity so options spanning several entities aren't ambiguous in the dropdown
+  const employees = useEmployees().map((e) => ({
+    ...e,
+    badge: entityShortNames(e.entities),
+  }));
+  const leaveTypes = useLeaveTypes().map((t) => ({
+    ...t,
+    badge: entityShortNames(t.entities),
+  }));
   // Entity scope is only meaningful to a superuser or an account spanning several entities
   const canAssignEntities =
     isSuperuser(session) || (session?.entities?.length || 0) > 1;
@@ -72,12 +80,25 @@ export default function LeaveForm({
     e.preventDefault();
     // The date inputs cannot express "to >= from" on their own
     if (days === 0) return setError("Tanggal selesai harus setelah tanggal mulai");
-    // Block overlapping active leave requests for the same employee.
-    // Declined requests don't block; only Open / Verified / Approved do.
-    const ACTIVE = new Set(["Open", "Verified", "Approved"]);
     const mine = new Set((formData.entities || []).map(String));
     const sharesEntity = (l) =>
       (l.entities || []).map(String).some((id) => mine.has(id));
+    // Exact duplicate: same entity, same employee, same date range
+    const duplicate = leaves.some(
+      (l) =>
+        l.hal_leave_id !== initialData?.hal_leave_id &&
+        l.hal_empy_nip === formData.hal_empy_nip &&
+        sharesEntity(l) &&
+        l.hal_request_datefr === formData.hal_request_datefr &&
+        l.hal_request_dateto === formData.hal_request_dateto,
+    );
+    if (duplicate)
+      return setError(
+        "Pengajuan cuti dengan karyawan, entity, dan rentang tanggal yang sama sudah ada.",
+      );
+    // Block overlapping active leave requests for the same employee.
+    // Declined requests don't block; only Open / Verified / Approved do.
+    const ACTIVE = new Set(["Open", "Verified", "Approved"]);
     const clash = leaves.some(
       (l) =>
         l.hal_leave_id !== initialData?.hal_leave_id &&
@@ -141,40 +162,28 @@ export default function LeaveForm({
                 <label htmlFor="hal_empy_nip" className={labelClass}>
                   Karyawan
                 </label>
-                <select autoComplete="off"
+                <Dropdown
                   id="hal_empy_nip"
+                  options={employees}
                   value={formData.hal_empy_nip}
-                  onChange={(e) => changeEmployee(e.target.value)}
+                  onChange={changeEmployee}
+                  placeholder="Pilih Karyawan"
                   required
-                  className={inputClass}
-                >
-                  <option value="">Pilih Karyawan</option>
-                  {employees.map((e) => (
-                    <option key={e.value} value={e.value}>
-                      {e.label}
-                    </option>
-                  ))}
-                </select>
+                />
               </div>
 
               <div>
                 <label htmlFor="hal_abs_type" className={labelClass}>
                   Jenis Cuti
                 </label>
-                <select autoComplete="off"
+                <Dropdown
                   id="hal_abs_type"
+                  options={leaveTypes}
                   value={formData.hal_abs_type}
-                  onChange={(e) => field("hal_abs_type", e.target.value)}
+                  onChange={(value) => field("hal_abs_type", value)}
+                  placeholder="Pilih Jenis Cuti"
                   required
-                  className={inputClass}
-                >
-                  <option value="">Pilih Jenis Cuti</option>
-                  {leaveTypes.map((t) => (
-                    <option key={t.value} value={t.value}>
-                      {t.label}
-                    </option>
-                  ))}
-                </select>
+                />
               </div>
             </div>
 
@@ -221,19 +230,13 @@ export default function LeaveForm({
                 <label htmlFor="hal_request_sts" className={labelClass}>
                   Status
                 </label>
-                <select autoComplete="off"
+                <Dropdown
                   id="hal_request_sts"
+                  options={LEAVE_STATUSES}
                   value={formData.hal_request_sts}
-                  onChange={(e) => field("hal_request_sts", e.target.value)}
+                  onChange={(value) => field("hal_request_sts", value)}
                   required
-                  className={inputClass}
-                >
-                  {LEAVE_STATUSES.map((s) => (
-                    <option key={s.value} value={s.value}>
-                      {s.label}
-                    </option>
-                  ))}
-                </select>
+                />
               </div>
             </div>
 

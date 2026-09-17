@@ -1,6 +1,6 @@
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Circle,
   MapContainer,
@@ -9,9 +9,18 @@ import {
   useMap,
   useMapEvents,
 } from "react-leaflet";
+import Dropdown from "../../../components/Dropdown";
 import MultiSelect from "../../../components/MultiSelect";
-import useSession, { isSuperuser, useEntities } from "../../../hooks/useSession";
+import useSession, {
+  isSuperuser,
+  useEntities,
+} from "../../../hooks/useSession";
 import { useClientGroups } from "../ClientGroup";
+
+const STATUSES = [
+  { value: "A", label: "Aktif" },
+  { value: "N", label: "Tidak Aktif" },
+];
 
 // Bandung — fallback center when the form has no coordinates yet
 const DEFAULT_CENTER = [-6.914722, 107.618611];
@@ -75,9 +84,16 @@ export default function ClientForm({
 }) {
   const [formData, setFormData] = useState(EMPTY);
   const [error, setError] = useState(null);
+  const [geo, setGeo] = useState(null);
+  const timer = useRef(null);
+  const seq = useRef(0);
   const [session] = useSession();
-  const { entityOptions } = useEntities();
-  const clientGroups = useClientGroups();
+  const { entityOptions, entityShortNames } = useEntities();
+  // Badge carries the entity so groups spanning several entities aren't ambiguous in the dropdown
+  const clientGroups = useClientGroups().map((g) => ({
+    ...g,
+    badge: entityShortNames(g.entities),
+  }));
   // Entity scope is only meaningful to a superuser or an account spanning several entities
   const canAssignEntities =
     isSuperuser(session) || (session?.entities?.length || 0) > 1;
@@ -85,7 +101,12 @@ export default function ClientForm({
   useEffect(() => {
     setFormData(initialData ? { ...EMPTY, ...initialData } : EMPTY);
     setError(null);
+    setGeo(null);
+    clearTimeout(timer.current);
+    seq.current++; // drop any in-flight lookup from the previous open
   }, [initialData, show]);
+
+  useEffect(() => () => clearTimeout(timer.current), []);
 
   if (!show) return null;
 
@@ -96,6 +117,31 @@ export default function ClientForm({
       mcm_cust_lat: lat.toFixed(6),
       mcm_cust_lon: lon.toFixed(6),
     });
+
+  const searchAddress = async (query, request) => {
+    setGeo("loading");
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`,
+      );
+      if (!response.ok) throw new Error("Geocoding failed");
+      const [result] = await response.json();
+      if (request !== seq.current) return;
+      if (!result) return setGeo("notfound");
+      pick(Number(result.lat), Number(result.lon));
+      setGeo(null);
+    } catch {
+      if (request === seq.current) setGeo("error");
+    }
+  };
+
+  const scheduleAddressSearch = (value) => {
+    clearTimeout(timer.current);
+    const request = ++seq.current;
+    const query = value.trim();
+    if (!query) return setGeo(null);
+    timer.current = setTimeout(() => searchAddress(query, request), 1000);
+  };
 
   const lat = Number(formData.mcm_cust_lat);
   const lon = Number(formData.mcm_cust_lon);
@@ -109,18 +155,25 @@ export default function ClientForm({
     // Slug is invisible, so surface the conflict in terms of the visible name.
     // A slug may repeat across entities — only a clash inside the same entity is an error.
     const slug = slugify(formData.mcm_cust_name);
-    const mine = (formData.entities || []).map(String);
+    // Non-superusers never set entities themselves — it's inherited from session on submit
+    const mine = (
+      formData.entities?.length ? formData.entities : session?.entities || []
+    ).map(String);
     const sharesEntity = (c) =>
       (c.entities || []).map(String).some((id) => mine.includes(id));
+    const isOther = (c) => c.mcm_cust_id !== initialData?.mcm_cust_id;
+    const code = formData.mcm_cust_short.trim();
+    // A clash on either code or name within the same entity is a duplicate
     const duplicate = clients.some(
       (c) =>
-        c.mcm_cust_id !== initialData?.mcm_cust_id &&
+        isOther(c) &&
         sharesEntity(c) &&
-        (c.mcm_cust_slug || slugify(c.mcm_cust_name)) === slug
+        (c.mcm_cust_short === code ||
+          (c.mcm_cust_slug || slugify(c.mcm_cust_name)) === slug),
     );
     if (duplicate) {
       return setError(
-        "Nama klien sudah terdaftar di entity ini. Gunakan nama lain."
+        "Nama atau kode klien sudah terdaftar di entity ini. Gunakan nama/kode lain.",
       );
     }
     // Keep the existing scope untouched when the editor cannot change it
@@ -131,14 +184,14 @@ export default function ClientForm({
             ...formData,
             mcm_cust_slug: slug,
             entities: initialData?.entities || [],
-          }
+          },
     );
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-lg bg-white shadow-xl">
-        <div className="sticky top-0 flex items-center justify-between border-b border-slate-200 bg-white px-6 py-4">
+        <div className="sticky top-0 flex items-center justify-between border-b border-slate-200 bg-white px-6 py-4 z-30">
           <h3 className="text-lg font-semibold text-slate-900">
             {initialData ? "Edit Klien" : "Tambah Klien"}
           </h3>
@@ -178,7 +231,8 @@ export default function ClientForm({
                 <label htmlFor="mcm_cust_short" className={labelClass}>
                   Kode Klien
                 </label>
-                <input autoComplete="off"
+                <input
+                  autoComplete="off"
                   id="mcm_cust_short"
                   value={formData.mcm_cust_short}
                   onChange={(e) => field("mcm_cust_short", e.target.value)}
@@ -193,7 +247,8 @@ export default function ClientForm({
                 <label htmlFor="mcm_cust_name" className={labelClass}>
                   Nama Klien
                 </label>
-                <input autoComplete="off"
+                <input
+                  autoComplete="off"
                   id="mcm_cust_name"
                   value={formData.mcm_cust_name}
                   onChange={(e) => field("mcm_cust_name", e.target.value)}
@@ -209,36 +264,27 @@ export default function ClientForm({
                 <label htmlFor="mcm_cust_group" className={labelClass}>
                   Grup Klien
                 </label>
-                <select autoComplete="off"
+                <Dropdown
                   id="mcm_cust_group"
+                  options={clientGroups}
                   value={formData.mcm_cust_group}
-                  onChange={(e) => field("mcm_cust_group", e.target.value)}
+                  onChange={(value) => field("mcm_cust_group", value)}
+                  placeholder="Pilih Grup"
                   required
-                  className={inputClass}
-                >
-                  <option value="">Pilih Grup</option>
-                  {clientGroups.map((g) => (
-                    <option key={g.value} value={g.value}>
-                      {g.label}
-                    </option>
-                  ))}
-                </select>
+                />
               </div>
 
               <div>
                 <label htmlFor="mcm_cust_status" className={labelClass}>
                   Status
                 </label>
-                <select autoComplete="off"
+                <Dropdown
                   id="mcm_cust_status"
+                  options={STATUSES}
                   value={formData.mcm_cust_status}
-                  onChange={(e) => field("mcm_cust_status", e.target.value)}
+                  onChange={(value) => field("mcm_cust_status", value)}
                   required
-                  className={inputClass}
-                >
-                  <option value="A">Aktif</option>
-                  <option value="N">Tidak Aktif</option>
-                </select>
+                />
               </div>
             </div>
 
@@ -246,15 +292,28 @@ export default function ClientForm({
               <label htmlFor="mcm_address" className={labelClass}>
                 Alamat Lengkap
               </label>
-              <textarea autoComplete="off"
+              <textarea
+                autoComplete="off"
                 id="mcm_address"
                 value={formData.mcm_address}
                 onChange={(e) => field("mcm_address", e.target.value)}
+                onKeyUp={(e) => scheduleAddressSearch(e.target.value)}
                 placeholder="Masukkan Alamat Lengkap"
                 rows={3}
                 required
                 className={inputClass}
               />
+              {geo && (
+                <p
+                  role="status"
+                  aria-live="polite"
+                  className="mt-1 text-xs text-slate-500"
+                >
+                  {geo === "loading" && "Mencari…"}
+                  {geo === "notfound" && "Alamat tidak ditemukan"}
+                  {geo === "error" && "Gagal menghubungi layanan peta"}
+                </p>
+              )}
             </div>
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -262,7 +321,8 @@ export default function ClientForm({
                 <label htmlFor="mcm_city" className={labelClass}>
                   Kota
                 </label>
-                <input autoComplete="off"
+                <input
+                  autoComplete="off"
                   id="mcm_city"
                   value={formData.mcm_city}
                   onChange={(e) => field("mcm_city", e.target.value)}
@@ -276,7 +336,8 @@ export default function ClientForm({
                 <label htmlFor="mcm_prov" className={labelClass}>
                   Provinsi
                 </label>
-                <input autoComplete="off"
+                <input
+                  autoComplete="off"
                   id="mcm_prov"
                   value={formData.mcm_prov}
                   onChange={(e) => field("mcm_prov", e.target.value)}
@@ -292,7 +353,8 @@ export default function ClientForm({
                 <label htmlFor="mcm_phone" className={labelClass}>
                   Telepon
                 </label>
-                <input autoComplete="off"
+                <input
+                  autoComplete="off"
                   id="mcm_phone"
                   type="tel"
                   inputMode="numeric"
@@ -309,7 +371,8 @@ export default function ClientForm({
                 <label htmlFor="mcm_cust_radius" className={labelClass}>
                   Radius Absensi (meter)
                 </label>
-                <input autoComplete="off"
+                <input
+                  autoComplete="off"
                   id="mcm_cust_radius"
                   type="number"
                   value={formData.mcm_cust_radius}
@@ -332,7 +395,8 @@ export default function ClientForm({
                 <label htmlFor="mcm_cust_lat" className={labelClass}>
                   Latitude
                 </label>
-                <input autoComplete="off"
+                <input
+                  autoComplete="off"
                   id="mcm_cust_lat"
                   value={formData.mcm_cust_lat}
                   onChange={(e) => field("mcm_cust_lat", e.target.value)}
@@ -346,7 +410,8 @@ export default function ClientForm({
                 <label htmlFor="mcm_cust_lon" className={labelClass}>
                   Longitude
                 </label>
-                <input autoComplete="off"
+                <input
+                  autoComplete="off"
                   id="mcm_cust_lon"
                   value={formData.mcm_cust_lon}
                   onChange={(e) => field("mcm_cust_lon", e.target.value)}
@@ -407,7 +472,8 @@ export default function ClientForm({
               <label htmlFor="mcm_remarks" className={labelClass}>
                 Catatan
               </label>
-              <textarea autoComplete="off"
+              <textarea
+                autoComplete="off"
                 id="mcm_remarks"
                 value={formData.mcm_remarks}
                 onChange={(e) => field("mcm_remarks", e.target.value)}
@@ -438,3 +504,4 @@ export default function ClientForm({
     </div>
   );
 }
+

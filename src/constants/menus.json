@@ -36,6 +36,16 @@
         "icon": "fa6-solid:layer-group"
       },
       {
+        "label": "Grup Klien",
+        "path": "/master/client-group",
+        "icon": "fa6-solid:sitemap"
+      },
+      {
+        "label": "Klien",
+        "path": "/master/client",
+        "icon": "fa6-solid:handshake"
+      },
+      {
         "label": "Tipe Waktu Kerja",
         "path": "/master/shift-type",
         "icon": "fa6-solid:business-time"
@@ -59,16 +69,6 @@
         "label": "Pegawai",
         "path": "/master/employee",
         "icon": "fa6-solid:id-badge"
-      },
-      {
-        "label": "Grup Klien",
-        "path": "/master/client-group",
-        "icon": "fa6-solid:sitemap"
-      },
-      {
-        "label": "Klien",
-        "path": "/master/client",
-        "icon": "fa6-solid:handshake"
       },
       {
         "label": "Penerima Tamu",

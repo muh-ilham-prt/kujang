@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import Dropdown from "../../../components/Dropdown";
 import MultiSelect from "../../../components/MultiSelect";
 import useLocalState from "../../../hooks/useLocalState";
 import { useEntities } from "../../../hooks/useSession";
@@ -118,20 +119,14 @@ export default function UserForm({ show, onClose, onSubmit, initialData }) {
               <label htmlFor="role" className={labelClass}>
                 Role
               </label>
-              <select autoComplete="off"
+              <Dropdown
                 id="role"
+                options={roles}
                 value={formData.role}
-                onChange={(e) => changeRole(e.target.value)}
+                onChange={changeRole}
+                placeholder="Pilih Role"
                 required
-                className={inputClass}
-              >
-                <option value="">Pilih Role</option>
-                {roles.map((r) => (
-                  <option key={r.value} value={r.value}>
-                    {r.label}
-                  </option>
-                ))}
-              </select>
+              />
             </div>
 
             <div>

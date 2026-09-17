@@ -1,7 +1,13 @@
 import { useEffect, useRef } from "react";
 
+const Badge = ({ children }) => (
+  <span className="shrink-0 rounded bg-slate-100 px-1.5 py-0.5 text-xs font-medium text-slate-500">
+    {children}
+  </span>
+);
+
 // Multi-select built on native <details> — open/close and keyboard nav come free.
-// options: [{ value, label }], value: array of selected values.
+// options: [{ value, label, badge? }], value: array of selected values.
 // disabled: read-only display (no dropdown) — used when scope is derived from a role.
 export default function MultiSelect({
   id,
@@ -70,7 +76,10 @@ export default function MultiSelect({
                 onChange={() => toggle(option.value)}
                 className="h-4 w-4 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500"
               />
-              {option.label}
+              <span className="flex min-w-0 flex-1 items-center justify-between gap-2">
+                <span className="truncate">{option.label}</span>
+                {option.badge && <Badge>{option.badge}</Badge>}
+              </span>
             </label>
           ))}
         </div>

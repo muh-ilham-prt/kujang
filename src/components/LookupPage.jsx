@@ -30,7 +30,11 @@ export const makeLookupHook = (storageKey) => () => {
   const [session] = useSession();
   return rows
     .filter((row) => inScope(session, row))
-    .map((row) => ({ value: String(row.id), label: row.name }));
+    .map((row) => ({
+      value: String(row.id),
+      label: row.name,
+      entities: row.entities,
+    }));
 };
 
 function LookupForm({ show, onClose, onSubmit, initialData, noun, rows = [] }) {

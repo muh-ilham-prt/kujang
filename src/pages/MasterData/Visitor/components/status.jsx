@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
+import Dropdown from "../../../../components/Dropdown";
 
-const inputClass =
-  "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none";
+const STATUSES = [
+  { value: "A", label: "Aktif" },
+  { value: "B", label: "Blacklist" },
+];
 
 export default function VisitorStatus({ visitor, onClose, onSubmit }) {
   const [status, setStatus] = useState("");
@@ -45,17 +48,14 @@ export default function VisitorStatus({ visitor, onClose, onSubmit }) {
               <label htmlFor="mv_vist_status" className="mb-1 block text-sm font-medium text-slate-700">
                 Status Baru
               </label>
-              <select autoComplete="off"
+              <Dropdown
                 id="mv_vist_status"
+                options={STATUSES}
                 value={status}
-                onChange={(e) => setStatus(e.target.value)}
+                onChange={setStatus}
+                placeholder="Pilih Status"
                 required
-                className={inputClass}
-              >
-                <option value="">Pilih Status</option>
-                <option value="A">Aktif</option>
-                <option value="B">Blacklist</option>
-              </select>
+              />
             </div>
           </div>
 

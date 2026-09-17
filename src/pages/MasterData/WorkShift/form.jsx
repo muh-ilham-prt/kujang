@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import Dropdown from "../../../components/Dropdown";
 import MultiSelect from "../../../components/MultiSelect";
 import useSession, { isSuperuser, useEntities } from "../../../hooks/useSession";
 import { useClients } from "../Client";
@@ -59,8 +60,12 @@ export default function WorkShiftForm({
   const [formData, setFormData] = useState(EMPTY);
   const [error, setError] = useState(null);
   const [session] = useSession();
-  const { entityOptions } = useEntities();
-  const clients = useClients();
+  const { entityOptions, entityShortNames } = useEntities();
+  // Badge carries the entity so clients spanning several entities aren't ambiguous in the dropdown
+  const clients = useClients().map((c) => ({
+    ...c,
+    badge: entityShortNames(c.entities),
+  }));
   // Entity scope is only meaningful to a superuser or an account spanning several entities
   const canAssignEntities =
     isSuperuser(session) || (session?.entities?.length || 0) > 1;
@@ -159,39 +164,27 @@ export default function WorkShiftForm({
               <label htmlFor="gwh_whtype" className={labelClass}>
                 Tipe Jam Kerja
               </label>
-              <select autoComplete="off"
+              <Dropdown
                 id="gwh_whtype"
+                options={shiftTypes}
                 value={formData.gwh_whtype}
-                onChange={(e) => field("gwh_whtype", e.target.value)}
+                onChange={(value) => field("gwh_whtype", value)}
+                placeholder="Pilih Tipe Jam Kerja"
                 required
-                className={inputClass}
-              >
-                <option value="">Pilih Tipe Jam Kerja</option>
-                {shiftTypes.map((t) => (
-                  <option key={t.value} value={t.value}>
-                    {t.label}
-                  </option>
-                ))}
-              </select>
+              />
             </div>
 
             <div>
               <label htmlFor="gwh_customer" className={labelClass}>
                 Klien
               </label>
-              <select autoComplete="off"
+              <Dropdown
                 id="gwh_customer"
+                options={clients}
                 value={formData.gwh_customer}
-                onChange={(e) => field("gwh_customer", e.target.value)}
-                className={inputClass}
-              >
-                <option value="">Pilih Klien</option>
-                {clients.map((c) => (
-                  <option key={c.value} value={c.value}>
-                    {c.label}
-                  </option>
-                ))}
-              </select>
+                onChange={(value) => field("gwh_customer", value)}
+                placeholder="Pilih Klien"
+              />
             </div>
 
             <div>

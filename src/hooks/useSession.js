@@ -39,5 +39,12 @@ export const useEntities = () => {
         .map((id) => entities.find((e) => String(e.id) === String(id))?.name)
         .filter(Boolean)
         .join(", ") || "-",
+    entityShortNames: (ids = []) =>
+      ids
+        .map(
+          (id) => entities.find((e) => String(e.id) === String(id))?.shortName,
+        )
+        .filter(Boolean)
+        .join(", ") || "-",
   };
 };

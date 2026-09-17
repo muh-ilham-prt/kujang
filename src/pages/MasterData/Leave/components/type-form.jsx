@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import Dropdown from "../../../../components/Dropdown";
 import MultiSelect from "../../../../components/MultiSelect";
 import useSession, {
   isSuperuser,
@@ -167,19 +168,13 @@ export default function LeaveTypeForm({
                 <label htmlFor="meat_quota_period" className={labelClass}>
                   Periode Quota
                 </label>
-                <select autoComplete="off"
+                <Dropdown
                   id="meat_quota_period"
+                  options={QUOTA_PERIODS}
                   value={formData.meat_quota_period}
-                  onChange={(e) => field("meat_quota_period", e.target.value)}
+                  onChange={(value) => field("meat_quota_period", value)}
                   required
-                  className={inputClass}
-                >
-                  {QUOTA_PERIODS.map((p) => (
-                    <option key={p.value} value={p.value}>
-                      {p.label}
-                    </option>
-                  ))}
-                </select>
+                />
               </div>
             </div>
 

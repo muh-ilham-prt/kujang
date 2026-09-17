@@ -23,6 +23,7 @@ export const useClients = () => {
     .map((client) => ({
       value: String(client.mcm_cust_id),
       label: client.mcm_cust_name,
+      entities: client.entities || [],
     }));
 };
 

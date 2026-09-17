@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import Dropdown from "../../../components/Dropdown";
 import MultiSelect from "../../../components/MultiSelect";
 import useSession, { isSuperuser, useEntities } from "../../../hooks/useSession";
 import { useClients } from "../Client";
@@ -34,8 +35,12 @@ export default function HostForm({
   const [formData, setFormData] = useState(EMPTY);
   const [error, setError] = useState(null);
   const [session] = useSession();
-  const { entityOptions } = useEntities();
-  const clients = useClients();
+  const { entityOptions, entityShortNames } = useEntities();
+  // Badge carries the entity so clients spanning several entities aren't ambiguous in the dropdown
+  const clients = useClients().map((c) => ({
+    ...c,
+    badge: entityShortNames(c.entities),
+  }));
   // Entity scope is only meaningful to a superuser or an account spanning several entities
   const canAssignEntities =
     isSuperuser(session) || (session?.entities?.length || 0) > 1;
@@ -122,20 +127,14 @@ export default function HostForm({
               <label htmlFor="mcr_customer" className={labelClass}>
                 Klien
               </label>
-              <select autoComplete="off"
+              <Dropdown
                 id="mcr_customer"
+                options={clients}
                 value={formData.mcr_customer}
-                onChange={(e) => field("mcr_customer", e.target.value)}
+                onChange={(value) => field("mcr_customer", value)}
+                placeholder="Pilih Klien"
                 required
-                className={inputClass}
-              >
-                <option value="">Pilih Klien</option>
-                {clients.map((c) => (
-                  <option key={c.value} value={c.value}>
-                    {c.label}
-                  </option>
-                ))}
-              </select>
+              />
             </div>
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

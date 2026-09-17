@@ -1,5 +1,6 @@
 import { Icon } from "@iconify/react";
 import { useState } from "react";
+import Dropdown from "../../../components/Dropdown";
 import Pagination from "../../../components/Pagination";
 import useLocalState from "../../../hooks/useLocalState";
 import useSession, {
@@ -165,23 +166,16 @@ export default function User() {
           }}
           className={filterInputClass}
         />
-        <select
-          autoComplete="off"
-          aria-label="Filter Role"
+        <Dropdown
+          id="filter-role"
+          options={[{ value: "", label: "Semua Role" }, ...ROLES]}
           value={role}
-          onChange={(e) => {
-            setRole(e.target.value);
+          onChange={(value) => {
+            setRole(value);
             resetPage();
           }}
-          className={`${filterInputClass} w-48`}
-        >
-          <option value="">Semua Role</option>
-          {ROLES.map((item) => (
-            <option key={item.value} value={item.value}>
-              {item.label}
-            </option>
-          ))}
-        </select>
+          className="w-48"
+        />
       </div>
 
       <div className="overflow-x-auto rounded-lg shadow">

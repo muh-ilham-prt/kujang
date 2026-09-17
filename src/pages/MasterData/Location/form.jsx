@@ -1,9 +1,19 @@
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useEffect, useState } from "react";
-import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from "react-leaflet";
+import {
+  MapContainer,
+  Marker,
+  TileLayer,
+  useMap,
+  useMapEvents,
+} from "react-leaflet";
+import Dropdown from "../../../components/Dropdown";
 import MultiSelect from "../../../components/MultiSelect";
-import useSession, { isSuperuser, useEntities } from "../../../hooks/useSession";
+import useSession, {
+  isSuperuser,
+  useEntities,
+} from "../../../hooks/useSession";
 import { useClients } from "../Client";
 
 // Internal system key — derived from the name so the system can find a location
@@ -53,12 +63,23 @@ function Recenter({ position }) {
   return null;
 }
 
-export default function LocationForm({ show, onClose, onSubmit, initialData, locations = [], locationTypes = [] }) {
+export default function LocationForm({
+  show,
+  onClose,
+  onSubmit,
+  initialData,
+  locations = [],
+  locationTypes = [],
+}) {
   const [formData, setFormData] = useState(EMPTY);
   const [error, setError] = useState(null);
   const [session] = useSession();
-  const { entityOptions } = useEntities();
-  const clients = useClients();
+  const { entityOptions, entityShortNames } = useEntities();
+  // Badge carries the entity so clients spanning several entities aren't ambiguous in the dropdown
+  const clients = useClients().map((c) => ({
+    ...c,
+    badge: entityShortNames(c.entities),
+  }));
   // Entity scope is only meaningful to a superuser or an account spanning several entities
   const canAssignEntities =
     isSuperuser(session) || (session?.entities?.length || 0) > 1;
@@ -97,23 +118,29 @@ export default function LocationForm({ show, onClose, onSubmit, initialData, loc
       (l) =>
         l.mlm_loc_id !== initialData?.mlm_loc_id &&
         sharesEntity(l) &&
-        (l.mlm_loc_slug || slugify(l.mlm_loc_name)) === slug
+        (l.mlm_loc_slug || slugify(l.mlm_loc_name)) === slug,
     );
     if (duplicate) {
-      return setError("Nama lokasi sudah terdaftar di entity ini. Gunakan nama lain.");
+      return setError(
+        "Nama lokasi sudah terdaftar di entity ini. Gunakan nama lain.",
+      );
     }
     // Keep the existing scope untouched when the editor cannot change it
     onSubmit(
       canAssignEntities
         ? { ...formData, mlm_loc_slug: slug }
-        : { ...formData, mlm_loc_slug: slug, entities: initialData?.entities || [] }
+        : {
+            ...formData,
+            mlm_loc_slug: slug,
+            entities: initialData?.entities || [],
+          },
     );
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-white shadow-xl">
-        <div className="sticky top-0 flex items-center justify-between border-b border-slate-200 bg-white px-6 py-4">
+        <div className="sticky top-0 flex items-center justify-between border-b border-slate-200 bg-white px-6 py-4 z-30">
           <h3 className="text-lg font-semibold text-slate-900">
             {initialData ? "Edit Lokasi" : "Tambah Lokasi"}
           </h3>
@@ -153,41 +180,29 @@ export default function LocationForm({ show, onClose, onSubmit, initialData, loc
                 <label htmlFor="mlm_loc_type" className={labelClass}>
                   Jenis Lokasi
                 </label>
-                <select autoComplete="off"
+                <Dropdown
                   id="mlm_loc_type"
+                  options={locationTypes}
                   value={formData.mlm_loc_type}
-                  onChange={(e) => field("mlm_loc_type", e.target.value)}
+                  onChange={(value) => field("mlm_loc_type", value)}
+                  placeholder="Pilih Jenis Lokasi"
                   required
-                  className={inputClass}
-                >
-                  <option value="">Pilih Jenis Lokasi</option>
-                  {locationTypes.map((t) => (
-                    <option key={t.value} value={t.value}>
-                      {t.label}
-                    </option>
-                  ))}
-                </select>
+                />
               </div>
 
               <div>
                 <label htmlFor="mlm_customer" className={labelClass}>
                   Klien
                 </label>
-                <select autoComplete="off"
+                <Dropdown
                   id="mlm_customer"
+                  options={clients}
                   value={formData.mlm_customer}
-                  onChange={(e) => field("mlm_customer", e.target.value)}
+                  onChange={(value) => field("mlm_customer", value)}
+                  placeholder="Pilih Klien"
                   // Klien is mandatory only for CHECKPOINT
                   required={formData.mlm_loc_type === "2"}
-                  className={inputClass}
-                >
-                  <option value="">Pilih Klien</option>
-                  {clients.map((c) => (
-                    <option key={c.value} value={c.value}>
-                      {c.label}
-                    </option>
-                  ))}
-                </select>
+                />
               </div>
             </div>
 
@@ -196,7 +211,8 @@ export default function LocationForm({ show, onClose, onSubmit, initialData, loc
                 <label htmlFor="mlm_loc_name" className={labelClass}>
                   Nama Lokasi
                 </label>
-                <input autoComplete="off"
+                <input
+                  autoComplete="off"
                   id="mlm_loc_name"
                   value={formData.mlm_loc_name}
                   onChange={(e) => field("mlm_loc_name", e.target.value)}
@@ -209,7 +225,8 @@ export default function LocationForm({ show, onClose, onSubmit, initialData, loc
                 <label htmlFor="mlm_loc_short" className={labelClass}>
                   Singkatan Lokasi
                 </label>
-                <input autoComplete="off"
+                <input
+                  autoComplete="off"
                   id="mlm_loc_short"
                   value={formData.mlm_loc_short}
                   onChange={(e) => field("mlm_loc_short", e.target.value)}
@@ -225,7 +242,8 @@ export default function LocationForm({ show, onClose, onSubmit, initialData, loc
                 <label htmlFor="mlm_loc_lat" className={labelClass}>
                   Latitude
                 </label>
-                <input autoComplete="off"
+                <input
+                  autoComplete="off"
                   id="mlm_loc_lat"
                   value={formData.mlm_loc_lat}
                   onChange={(e) => field("mlm_loc_lat", e.target.value)}
@@ -239,7 +257,8 @@ export default function LocationForm({ show, onClose, onSubmit, initialData, loc
                 <label htmlFor="mlm_loc_lon" className={labelClass}>
                   Longitude
                 </label>
-                <input autoComplete="off"
+                <input
+                  autoComplete="off"
                   id="mlm_loc_lon"
                   value={formData.mlm_loc_lon}
                   onChange={(e) => field("mlm_loc_lon", e.target.value)}
@@ -309,3 +328,4 @@ export default function LocationForm({ show, onClose, onSubmit, initialData, loc
     </div>
   );
 }
+

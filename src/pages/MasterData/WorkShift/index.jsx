@@ -1,5 +1,6 @@
 import { Icon } from "@iconify/react";
 import { useState } from "react";
+import Dropdown from "../../../components/Dropdown";
 import MultiSelect from "../../../components/MultiSelect";
 import Pagination from "../../../components/Pagination";
 import useLocalState from "../../../hooks/useLocalState";
@@ -23,8 +24,11 @@ const EMPTY_FILTERS = { clients: [], type: "", name: "" };
 const filterInputClass =
   "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 focus:outline-none";
 
-const labelOf = (options, value) =>
-  options.find((option) => option.value === String(value))?.label || "-";
+const labelOf = (options, value) => {
+  const option = options.find((o) => o.value === String(value));
+  if (!option) return "-";
+  return option.badge ? `${option.label} [${option.badge}]` : option.label;
+};
 
 const COLUMNS = [
   ["gwh_work_name", "Nama"],
@@ -43,9 +47,17 @@ export default function WorkShift() {
   const canCreate = can(session, PERM_PATH, "create");
   const canUpdate = can(session, PERM_PATH, "update");
   const canDelete = can(session, PERM_PATH, "delete");
-  const { entityNames } = useEntities();
-  const clientOptions = useClients();
-  const shiftTypeOptions = useShiftTypes();
+  const { entityNames, entityShortNames } = useEntities();
+  // Badge carries the entity so clients spanning several entities aren't ambiguous in the dropdown
+  const clientOptions = useClients().map((c) => ({
+    ...c,
+    badge: entityShortNames(c.entities),
+  }));
+  // Badge carries the entity so shifts spanning several entities aren't ambiguous in the dropdown
+  const shiftTypeOptions = useShiftTypes().map((t) => ({
+    ...t,
+    badge: entityShortNames(t.entities),
+  }));
   // Entity scope is only meaningful to a superuser or an account spanning several entities
   const canSeeEntities =
     isSuperuser(session) || (session?.entities?.length || 0) > 1;
@@ -161,20 +173,16 @@ export default function WorkShift() {
             >
               Tipe Jam Kerja
             </label>
-            <select
-              autoComplete="off"
+            <Dropdown
               id="filter-type"
+              options={[
+                { value: "", label: "Semua Tipe Jam Kerja" },
+                ...shiftTypeOptions,
+              ]}
               value={filters.type}
-              onChange={(e) => setFilter("type", e.target.value)}
-              className={filterInputClass}
-            >
-              <option value="">Semua Tipe Jam Kerja</option>
-              {shiftTypeOptions.map((t) => (
-                <option key={t.value} value={t.value}>
-                  {t.label}
-                </option>
-              ))}
-            </select>
+              onChange={(value) => setFilter("type", value)}
+              className="w-full"
+            />
           </div>
 
           <div>

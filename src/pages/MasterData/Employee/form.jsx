@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import defaultAvatar from "../../../assets/default-user.jpg";
+import Dropdown from "../../../components/Dropdown";
 import MultiSelect from "../../../components/MultiSelect";
 import useSession, {
   isSuperuser,
@@ -35,11 +36,14 @@ export default function EmployeeForm({
   const [formData, setFormData] = useState(EMPTY);
   const [error, setError] = useState(null);
   const [session] = useSession();
-  const { entityOptions } = useEntities();
-  // Every option list is entity-scoped, so it follows the session automatically
-  const levels = useLevels();
-  const positions = usePositions();
-  const clients = useClients();
+  const { entityOptions, entityShortNames } = useEntities();
+  // Every option list is entity-scoped, so it follows the session automatically.
+  // Badge carries the entity so options spanning several entities aren't ambiguous in the dropdown
+  const withBadge = (list) =>
+    list.map((item) => ({ ...item, badge: entityShortNames(item.entities) }));
+  const levels = withBadge(useLevels());
+  const positions = withBadge(usePositions());
+  const clients = withBadge(useClients());
   const selects = [
     ["mem_empy_level", "Level", levels, "Pilih Level"],
     ["mem_empy_position", "Jabatan", positions, "Pilih Jabatan"],
@@ -212,20 +216,16 @@ export default function EmployeeForm({
                 <label htmlFor="mem_empy_upper" className={labelClass}>
                   Atasan
                 </label>
-                <select
-                  autoComplete="off"
+                <Dropdown
                   id="mem_empy_upper"
+                  options={supervisors.map((e) => ({
+                    value: e.mem_empy_nip,
+                    label: e.mem_empy_name,
+                  }))}
                   value={formData.mem_empy_upper}
-                  onChange={(e) => field("mem_empy_upper", e.target.value)}
-                  className={inputClass}
-                >
-                  <option value="">Pilih Atasan</option>
-                  {supervisors.map((e) => (
-                    <option key={e.mem_empy_nip} value={e.mem_empy_nip}>
-                      {e.mem_empy_name}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(value) => field("mem_empy_upper", value)}
+                  placeholder="Pilih Atasan"
+                />
               </div>
 
               {selects.map(([name, label, options, placeholder]) => (
@@ -233,21 +233,14 @@ export default function EmployeeForm({
                   <label htmlFor={name} className={labelClass}>
                     {label}
                   </label>
-                  <select
-                    autoComplete="off"
+                  <Dropdown
                     id={name}
+                    options={options}
                     value={formData[name]}
-                    onChange={(e) => field(name, e.target.value)}
+                    onChange={(value) => field(name, value)}
+                    placeholder={placeholder}
                     required
-                    className={inputClass}
-                  >
-                    <option value="">{placeholder}</option>
-                    {options.map((o) => (
-                      <option key={o.value} value={o.value}>
-                        {o.label}
-                      </option>
-                    ))}
-                  </select>
+                  />
                 </div>
               ))}
             </div>
