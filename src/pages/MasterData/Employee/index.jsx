@@ -14,6 +14,7 @@ import { useLevels } from "../Level";
 import { usePositions } from "../Position";
 import EmployeeForm from "./form";
 import EmployeeImport from "./components/import";
+import * as XLSX from "xlsx";
 
 const PER_PAGE = 10;
 // matches the menu path in constants/menus.json
@@ -130,7 +131,7 @@ export default function Employee() {
   const supervisorName = (nip) =>
     employees.find((e) => e.mem_empy_nip === nip)?.mem_empy_name || "-";
 
-  // ponytail: CSV (Excel opens it natively) — switch to a real .xlsx when the API exports one
+  // ponytail: switch to a real .xlsx export using xlsx library
   const exportExcel = () => {
     const headers = [
       "NIP",
@@ -150,21 +151,20 @@ export default function Employee() {
       labelOf(positionOptions, e.mem_empy_position),
       labelOf(clientOptions, e.mem_customer_id),
     ]);
-    // A leading "=" or "+" turns a cell into a formula in Excel — prefix those with a quote
-    const cell = (v) =>
-      `"${String(v ?? "")
-        .replace(/^[=+\-@]/, "'$&")
-        .replace(/"/g, '""')}"`;
-    const csv = [headers, ...rows].map((r) => r.map(cell).join(",")).join("\n");
-    // BOM so Excel reads UTF-8 correctly
-    const url = URL.createObjectURL(
-      new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" }),
-    );
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "karyawan.csv";
-    link.click();
-    URL.revokeObjectURL(url);
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+    // Set column widths
+    ws["!cols"] = [
+      { wch: 15 }, // NIP
+      { wch: 25 }, // Nama
+      { wch: 18 }, // No. Telepon
+      { wch: 20 }, // Atasan
+      { wch: 15 }, // Level
+      { wch: 20 }, // Jabatan
+      { wch: 20 }, // Klien
+    ];
+    XLSX.utils.book_append_sheet(wb, ws, "Karyawan");
+    XLSX.writeFile(wb, "karyawan.xlsx");
   };
 
   // ponytail: print dialog → "Save as PDF" — swap for a server-rendered PDF when the API lands
