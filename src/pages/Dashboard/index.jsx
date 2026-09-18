@@ -5,6 +5,7 @@ import EmployeeAttendanceToday from "./components/EmployeeAttendanceToday";
 import MapEmployee from "./components/MapEmployee";
 import useLocalState from "../../hooks/useLocalState";
 import useSession, { isSuperuser } from "../../hooks/useSession";
+import { useEffect } from "react";
 
 // Pill tabs let a multi-entity account flick between per-entity dashboards
 // instead of seeing everything side-by-side. Single entity → no tabs.
@@ -28,6 +29,19 @@ export default function Dashboard() {
     allEntities.find((e) => String(e.id) === String(activeId)) ||
     allEntities[0];
 
+  // Debug
+  useEffect(() => {
+    console.log("=== Dashboard Debug ===");
+    console.log("Session:", session);
+    console.log("Is Superuser:", isSuperuser(session));
+    console.log("All entities from localStorage:", entities);
+    console.log("Mine (session.entities):", mine);
+    console.log("AllEntities:", allEntities);
+    console.log("ActiveId:", activeId);
+    console.log("Active:", active);
+    console.log("Active?.id:", active?.id);
+  }, [session, entities, activeId, active, mine, allEntities]);
+
   return (
     <div className="flex flex-col gap-4 p-4">
       {allEntities.length > 1 && (
@@ -50,9 +64,9 @@ export default function Dashboard() {
       )}
 
       <ChartEmployeePerCustomer entityId={active?.id} />
-      <EmployeeAttendanceToday />
-      <ChartAttendanceWeek />
-      <MapEmployee />
+      <EmployeeAttendanceToday entityId={active?.id} />
+      <ChartAttendanceWeek entityId={active?.id} />
+      <MapEmployee entityId={active?.id} />
     </div>
   );
 }

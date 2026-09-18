@@ -75,7 +75,8 @@ export default function Navbar({ toggleSidebar, isSidebarOpen = true }) {
           {isDropdownOpen && (
             <div className="absolute right-0 z-10 mt-2 w-52 animate-[card-in_0.15s_ease-out] overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-xl">
               <p className="truncate border-b border-slate-100 px-4 py-2 text-xs text-slate-500">
-                Masuk sebagai <span className="font-semibold text-slate-700">{userName}</span>
+                Masuk sebagai{" "}
+                <span className="font-semibold text-slate-700">{userName}</span>
               </p>
               <Link
                 to="/dashboard"
@@ -99,7 +100,10 @@ export default function Navbar({ toggleSidebar, isSidebarOpen = true }) {
                 onClick={handleLogout}
                 className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-red-600 transition hover:bg-red-50"
               >
-                <Icon icon="fa6-solid:right-from-bracket" className="size-3.5" />
+                <Icon
+                  icon="fa6-solid:right-from-bracket"
+                  className="size-3.5"
+                />
                 Logout
               </button>
             </div>
@@ -109,3 +113,4 @@ export default function Navbar({ toggleSidebar, isSidebarOpen = true }) {
     </nav>
   );
 }
+
